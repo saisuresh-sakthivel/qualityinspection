@@ -19,12 +19,15 @@ export function LoginForm({ schema }: { schema: FormFieldSchema[] }) {
     <Form
       title={t("loginHeading")}
       schema={schema}
-      action={action}
-      submitLabel={t("submit")}
-      pending={pending}
+      onSubmit={{
+        label: t("submit"),
+        action,
+        disabled: pending,
+        className: "w-full",
+        size: "md",
+      }}
       error={state.error ? t("invalid") : null}
       className="mt-2.5 flex w-full max-w-xl flex-col items-center gap-4 text-center"
-      submitClassName="w-full text-base"
     />
   );
 }

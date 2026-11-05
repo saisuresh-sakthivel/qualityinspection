@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
-// Switch providers by importing classifyUnitImage from "@/ai/openai" instead.
-import { classifyUnitImage } from "@/ai/openai";
 import { errorResponse, toErrorResponse } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
 import { getPrisma } from "@/lib/db";
 import { extensionForMime, storePendingClassification } from "@/lib/uploads";
+import type { VisionPrediction } from "@/types/models";
+// import { classifyUnitImage } from "@/ai/openai";
+
+/**
+ * Fixed reply while the vision call is paused.
+ * Restore the live model by uncommenting the import and the call below.
+ */
+const TEST_PREDICTION: VisionPrediction = {
+  predictedDefectType: "Scratch",
+  confidence: 0.85,
+};
 
 export const maxDuration = 30;
 
@@ -35,7 +44,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       return errorResponse(400, "UNSUPPORTED_IMAGE");
     }
 
-    const prediction = await classifyUnitImage(bytes, file.type);
+    // const prediction = await classifyUnitImage(bytes, file.type);
+    const prediction = TEST_PREDICTION;
     const pending = await storePendingClassification(bytes, file.type, {
       batchId,
       inspectorId: user.id,

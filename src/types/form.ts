@@ -6,6 +6,21 @@ export interface FormFieldValidation {
   required?: boolean;
 }
 
+/**
+ * Submit or cancel control passed into the shared form.
+ * Omit cancel when a screen only submits, such as login.
+ */
+export interface FormActionConfig {
+  label: string;
+  /** Native form action. The button submits the form. */
+  action?: (formData: FormData) => void | Promise<void>;
+  /** Click handler when the screen owns the action. */
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  size?: "sm" | "md";
+}
+
 /** One choice for a select field. Labels are already translated. */
 export interface FormFieldOption {
   value: string;
@@ -23,6 +38,10 @@ export interface FormFieldSchema {
   validation?: FormFieldValidation;
   placeholder?: string;
   hint?: string;
+  /** File fields use this as the label on the select button. */
+  buttonLabel?: string;
+  /** Accessible name for the control that clears a chosen file. */
+  clearLabel?: string;
   autoComplete?: string;
   accept?: string;
   options?: FormFieldOption[];

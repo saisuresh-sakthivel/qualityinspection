@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
+import { StyledButton } from "@/components/StyledButton";
 
 interface ModalProps {
   title: string;
@@ -13,6 +14,8 @@ interface ModalProps {
   onSubmit?: () => void;
   submitLabel?: string;
   submitDisabled?: boolean;
+  /** Extra footer action placed beside Close, such as Inspection steps. */
+  footer?: ReactNode;
   /** Stacks a later dialog above an earlier one. */
   layer?: 1 | 2 | 3;
 }
@@ -30,6 +33,7 @@ export function Modal({
   onSubmit,
   submitLabel,
   submitDisabled = false,
+  footer,
   layer = 1,
 }: ModalProps) {
   return (
@@ -49,7 +53,7 @@ export function Modal({
             {title}
           </h2>
           <button
-            className="inline-flex cursor-pointer border-0 bg-transparent p-1 text-black hover:bg-accent"
+            className="inline-flex cursor-pointer border-0 bg-transparent p-1 text-foreground hover:bg-accent"
             type="button"
             onClick={onClose}
             aria-label={closeLabel}
@@ -58,24 +62,21 @@ export function Modal({
           </button>
         </div>
         <div>{children}</div>
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex w-full items-stretch gap-3">
+          {footer}
           {onSubmit ? (
-            <button
-              className="inline-block cursor-pointer rounded-md border border-primary bg-primary px-4 py-2 font-sans text-sm text-on-primary hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.55]"
-              type="button"
+            <StyledButton
+              variant="primary"
+              className="flex-1"
               onClick={onSubmit}
               disabled={submitDisabled}
             >
               {submitLabel}
-            </button>
+            </StyledButton>
           ) : null}
-          <button
-            className="inline-block cursor-pointer rounded-md border border-border bg-surface px-4 py-2 font-sans text-sm text-black hover:bg-accent"
-            type="button"
-            onClick={onClose}
-          >
+          <StyledButton variant="secondary" className="flex-1" onClick={onClose}>
             {closeLabel}
-          </button>
+          </StyledButton>
         </div>
       </div>
     </div>

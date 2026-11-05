@@ -65,9 +65,7 @@ export function BatchForm() {
   return (
     <Form
       schema={schema}
-      action={onSubmit}
-      submitLabel={t("create")}
-      pending={pending}
+      onSubmit={{ label: t("create"), action: onSubmit, disabled: pending }}
       error={error}
       className="flex max-w-xl flex-col gap-4 rounded-lg border border-border bg-muted p-4"
     />

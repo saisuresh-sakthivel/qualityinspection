@@ -26,7 +26,7 @@ export function AppNav() {
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className="rounded-md px-3 py-1.5 text-base text-foreground no-underline hover:bg-accent hover:text-black aria-[current=page]:bg-accent aria-[current=page]:text-black"
+            className="rounded-md px-3 py-1.5 text-base text-foreground no-underline hover:bg-accent aria-[current=page]:bg-accent"
           >
             {item.label}
           </Link>

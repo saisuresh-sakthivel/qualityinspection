@@ -1,20 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  /* Colors — white + light blue theme */
-  --color-bg: #ffffff;
-  --color-bg-muted: #f0f7fc;
-  --color-surface: #ffffff;
-  --color-border: #c5dff0;
-  --color-primary: #3b82b5;
-  --color-primary-hover: #6ca1c8;
-  --color-text: #000000;
-  --color-text-black: #000000;
-  --color-text-muted: #000000;
-  --color-accent: #d6ebf7;
+  /* Dark reddish black, with Tailwind red-500 as the primary action. */
+  color-scheme: dark;
+  --color-bg: #140c0e;
+  --color-bg-muted: #1c1214;
+  --color-surface: #241618;
+  --color-border: #5c3a40;
+  --color-primary: #ef4444;
+  --color-primary-hover: #dc2626;
+  --color-primary-bright: #f87171;
+  --color-text: #fafafa;
+  --color-text-black: #fafafa;
+  --color-text-muted: #b3a3a6;
+  --color-accent: #3a2226;
   --color-on-primary: #ffffff;
-  --color-danger: #9b3b3b;
-  --color-overlay: rgb(26 43 60 / 35%);
+  --color-danger: #fecaca;
+  --color-overlay: rgb(8 2 4 / 72%);
 
   /* Font sizes */
   --font-size-xs: 0.75rem;
@@ -36,10 +38,12 @@
   --color-border: var(--color-border);
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
+  --color-primary-bright: var(--color-primary-bright);
   --color-accent: var(--color-accent);
   --color-on-primary: var(--color-on-primary);
   --color-danger: var(--color-danger);
   --color-overlay: var(--color-overlay);
+  --color-subtle: var(--color-text-muted);
   --font-sans: var(--font-sans);
   --text-xs: var(--font-size-xs);
   --text-sm: var(--font-size-sm);
@@ -48,4 +52,50 @@
   --text-xl: var(--font-size-xl);
   --text-hero: var(--font-size-hero);
   --text-display: var(--font-size-display);
+}
+
+::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* React ViewTransition classes for the inspection steps. */
+::view-transition-group(.step-resize) {
+  animation-duration: 350ms;
+  animation-timing-function: ease;
+}
+
+::view-transition-old(.step-resize),
+::view-transition-new(.step-resize) {
+  animation: none;
+  height: 100%;
+}
+
+::view-transition-old(.step-exit) {
+  animation: 350ms ease both vt-step-exit;
+}
+
+::view-transition-new(.step-enter) {
+  animation: 350ms ease both vt-step-enter;
+}
+
+@keyframes vt-step-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+@keyframes vt-step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(.step-resize),
+  ::view-transition-old(.step-exit),
+  ::view-transition-new(.step-enter) {
+    animation: none;
+  }
 }

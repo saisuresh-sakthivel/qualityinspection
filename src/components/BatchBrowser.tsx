@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { BatchDetails } from "@/components/BatchDetails";
 import { Modal } from "@/components/Modal";
+import { StyledButton } from "@/components/StyledButton";
 import type { Batch } from "@/types/models";
 
 interface BatchBrowserProps {
@@ -29,7 +30,7 @@ export function BatchBrowser({ batches, canLog }: BatchBrowserProps) {
         {batches.map((batch) => (
           <li key={batch.id}>
             <button
-              className="block w-full cursor-pointer rounded-lg border border-border bg-muted p-4 text-left text-black hover:bg-surface"
+              className="block w-full cursor-pointer rounded-lg border border-border bg-muted p-4 text-left text-foreground hover:bg-surface"
               type="button"
               onClick={() => setSelected(batch)}
             >
@@ -48,8 +49,19 @@ export function BatchBrowser({ batches, canLog }: BatchBrowserProps) {
           titleId="batch-details-title"
           closeLabel={t("close")}
           onClose={() => setSelected(null)}
+          footer={
+            canLog ? (
+              <StyledButton
+                variant="primary"
+                className="flex-1"
+                href={`/batches/${encodeURIComponent(selected.id)}/inspect`}
+              >
+                {t("logInspection")}
+              </StyledButton>
+            ) : null
+          }
         >
-          <BatchDetails batch={selected} canLog={canLog} />
+          <BatchDetails batch={selected} />
         </Modal>
       ) : null}
     </>

@@ -26,7 +26,7 @@ export default async function LoginPage() {
   ];
 
   return (
-    <div className="flex flex-1 flex-col text-black">
+    <div className="flex flex-1 flex-col text-foreground">
       <main className="flex flex-1 items-start justify-center px-4 pb-8">
         <LoginForm schema={schema} />
       </main>

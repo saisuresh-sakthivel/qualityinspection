@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { startTransition, useState, ViewTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ChevronUp, Loader2 } from "lucide-react";
+import { ChevronRight, ChevronUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { AiPrediction } from "@/components/AiPrediction";
 import { Form } from "@/components/Form";
 import { Modal } from "@/components/Modal";
+import { StyledButton } from "@/components/StyledButton";
 import { DEFECT_TYPES, isDefectType } from "@/domain/defects";
 import { errorTranslationKey } from "@/domain/errors";
 import { ApiError, classifyInspection, saveInspection } from "@/lib/apiClient";
@@ -53,6 +55,8 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sameCategory, setSameCategory] = useState(false);
+  const [categoryRequired, setCategoryRequired] = useState(false);
+  const [showOverride, setShowOverride] = useState(false);
   const [confirming, setConfirming] = useState<Confirming | null>(null);
 
   const predicted = review?.prediction?.predictedDefectType ?? null;
@@ -78,39 +82,52 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
       formData.set("batchId", batchId);
       formData.set("image", file);
       const body = await classifyInspection(formData);
-      setReview({ imageId: body.imageId, prediction: body.prediction });
-      setCategory("");
-      setSameCategory(false);
-      setConfirming(null);
+      startTransition(() => {
+        setReview({ imageId: body.imageId, prediction: body.prediction });
+        setCategory("");
+        setComments("");
+        setSameCategory(false);
+        setCategoryRequired(false);
+        setShowOverride(false);
+        setConfirming(null);
+        setPending(false);
+      });
     } catch (caught) {
       setError(inspectionErrorMessage(caught, (key) => tErrors(key)));
-    } finally {
       setPending(false);
     }
   }
 
   /**
-   * Allow keeps the model label. Deny requires a different category.
+   * Keeps the model label and asks the engineer to confirm it.
    */
-  function choose(next: Confirming) {
-    if (next === "allow") {
-      if (!predicted) {
-        return;
-      }
-      setSameCategory(false);
-      setError(null);
-      setConfirming("allow");
+  function acceptPrediction() {
+    if (!predicted) {
       return;
     }
+    setSameCategory(false);
+    setCategoryRequired(false);
+    setError(null);
+    setConfirming("allow");
+  }
+
+  /**
+   * Saves a different category. The category is required; comments stay optional.
+   */
+  function overwrite() {
     if (!isDefectType(category)) {
+      setCategoryRequired(true);
+      setSameCategory(false);
+      setConfirming(null);
       return;
     }
     if (predicted && category === predicted) {
+      setCategoryRequired(false);
       setSameCategory(true);
       setConfirming(null);
-      window.alert(t("sameAsPrediction"));
       return;
     }
+    setCategoryRequired(false);
     setSameCategory(false);
     setError(null);
     setConfirming("deny");
@@ -145,7 +162,11 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
       label: t("category"),
       placeholder: t("chooseCategory"),
       value: category,
-      error: sameCategory ? t("sameAsPrediction") : undefined,
+      error: categoryRequired
+        ? t("categoryRequired")
+        : sameCategory
+          ? t("sameAsPrediction")
+          : undefined,
       options: DEFECT_TYPES.map((type) => ({
         value: type,
         label: tDefect(type),
@@ -163,93 +184,101 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
   return (
     <>
       <div className="flex max-w-2xl flex-col overflow-hidden rounded-lg border border-border bg-surface">
-        <StepSection
-          title={t("stepUpload")}
-          hint={uploadDone ? (file?.name ?? t("stepUpload")) : t("stepUploadHint")}
-          state={uploadDone ? "done" : "open"}
-        >
-          <Form
-            className="flex max-w-xl flex-col gap-4"
-            error={error}
-            schema={[
-              {
-                name: "image",
-                type: "file",
-                label: t("image"),
-                accept: "image/jpeg,image/png,image/webp",
-              },
-            ]}
-            onChange={(_name, value) => {
-              setFile(value instanceof File ? value : null);
-              setError(null);
-            }}
+        <ViewTransition update="step-resize">
+          <StepSection
+            title={t("stepUpload")}
+            hint={uploadDone ? (file?.name ?? t("stepUploadHint")) : t("stepUploadHint")}
+            state={uploadDone ? "done" : "open"}
+            transitionName="inspection-upload"
           >
-            <div className="flex flex-wrap justify-start gap-3">
-              <button
-                className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-primary bg-primary px-4 py-2 font-sans text-sm text-on-primary hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.55]"
-                type="button"
-                disabled={pending || !file}
-                onClick={analyze}
-              >
-                {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-                {pending ? t("analyzing") : t("analyze")}
-              </button>
-            </div>
-          </Form>
-        </StepSection>
-
-        <StepSection
-          title={t("stepPrediction")}
-          hint={uploadDone ? t("stepPredictionHint") : t("stepPredictionLocked")}
-          state={uploadDone ? "open" : "locked"}
-        >
-          <div className="flex max-w-xl flex-col gap-4">
-            {predicted && review?.prediction ? (
-              <p>
-                {tDefect(predicted)}
-                {` · ${t("confidence")} ${t("confidenceValue", {
-                  value: Math.round(review.prediction.confidence * 100),
-                })}`}
-              </p>
-            ) : (
-              <p className="text-sm text-danger">{tErrors("predictionInvalid")}</p>
-            )}
             <Form
-              className="flex max-w-xl flex-col gap-4"
-              schema={reviewSchema}
-              onChange={(name, value) => {
-                if (typeof value !== "string") {
-                  return;
-                }
-                if (name === "category") {
-                  setCategory(isDefectType(value) ? value : "");
-                  setSameCategory(false);
-                  return;
-                }
-                setComments(value);
+              className="flex w-full flex-col gap-4"
+              error={error}
+              schema={[
+                {
+                  name: "image",
+                  type: "file",
+                  label: t("dropTitle"),
+                  hint: t("dropHint"),
+                  buttonLabel: t("selectFile"),
+                  clearLabel: t("removePhoto"),
+                  accept: "image/jpeg,image/png,image/webp",
+                },
+              ]}
+              onChange={(_name, value) => {
+                setFile(value instanceof File ? value : null);
+                setError(null);
               }}
-            >
-              <div className="flex flex-wrap justify-start gap-3">
-                <button
-                  className="inline-block cursor-pointer rounded-md border border-border bg-surface px-4 py-2 font-sans text-sm text-black hover:bg-accent disabled:cursor-not-allowed disabled:opacity-[0.55]"
-                  type="button"
+              onSubmit={{
+                label: pending ? t("analyzing") : t("analyze"),
+                onClick: analyze,
+                disabled: pending || !file,
+                className: "mx-auto",
+              }}
+            />
+          </StepSection>
+        </ViewTransition>
+
+        <ViewTransition update="step-resize">
+          <StepSection
+            title={t("stepPrediction")}
+            hint={uploadDone ? t("stepPredictionHint") : t("stepPredictionLocked")}
+            state={uploadDone ? "open" : "locked"}
+            transitionName="inspection-prediction"
+          >
+            <div className="flex flex-col items-center gap-4">
+              {predicted && review?.prediction ? (
+                <AiPrediction defectType={predicted} confidence={review.prediction.confidence} />
+              ) : (
+                <p className="text-sm text-danger">{tErrors("predictionInvalid")}</p>
+              )}
+              <div className="flex items-center gap-3">
+                <StyledButton
+                  variant="primary"
                   disabled={!predicted || pending}
-                  onClick={() => choose("allow")}
+                  onClick={acceptPrediction}
                 >
                   {t("allow")}
-                </button>
-                <button
-                  className="inline-block cursor-pointer rounded-md border border-border bg-surface px-4 py-2 font-sans text-sm text-black hover:bg-accent disabled:cursor-not-allowed disabled:opacity-[0.55]"
-                  type="button"
-                  disabled={!isDefectType(category) || pending}
-                  onClick={() => choose("deny")}
+                </StyledButton>
+                <StyledButton
+                  variant="secondary"
+                  disabled={!predicted || pending}
+                  onClick={() => setShowOverride(true)}
                 >
                   {t("deny")}
-                </button>
+                </StyledButton>
               </div>
-            </Form>
-          </div>
-        </StepSection>
+              {showOverride ? (
+                <Form
+                  className="flex w-full max-w-xl flex-col gap-4"
+                  schema={reviewSchema}
+                  onChange={(name, value) => {
+                    if (typeof value !== "string") {
+                      return;
+                    }
+                    if (name === "category") {
+                      setCategory(isDefectType(value) ? value : "");
+                      setSameCategory(false);
+                      setCategoryRequired(false);
+                      return;
+                    }
+                    setComments(value);
+                  }}
+                  onSubmit={{
+                    label: t("acceptPrediction"),
+                    onClick: acceptPrediction,
+                    disabled: !predicted || pending,
+                  }}
+                  onCancel={{
+                    label: t("overwrite"),
+                    onClick: overwrite,
+                    disabled: pending,
+                  }}
+                />
+              ) : null}
+            </div>
+          </StepSection>
+        </ViewTransition>
       </div>
 
       {confirming && isDefectType(finalType) ? (
@@ -284,11 +313,14 @@ function StepSection({
   title,
   hint,
   state,
+  transitionName,
   children,
 }: {
   title: string;
   hint: string;
   state: "open" | "done" | "locked";
+  /** Stable view-transition name so this step can enter and exit on its own. */
+  transitionName: string;
   children?: ReactNode;
 }) {
   const Icon = state === "open" ? ChevronUp : ChevronRight;
@@ -310,7 +342,11 @@ function StepSection({
         </div>
         <Icon aria-hidden="true" />
       </div>
-      {state === "open" ? <div className="mt-4">{children}</div> : null}
+      {state === "open" ? (
+        <ViewTransition name={transitionName} enter="step-enter" exit="step-exit">
+          <div className="mt-4">{children}</div>
+        </ViewTransition>
+      ) : null}
     </section>
   );
 }
