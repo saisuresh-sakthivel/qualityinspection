@@ -9,9 +9,18 @@ export type DefectType =
 /** Application roles used for the lightweight role switcher. */
 export type UserRole = "QUALITY_ENGINEER" | "PRODUCTION_SUPERVISOR";
 
+/** Signed-in user. Password hashes never leave the server. */
+export interface SessionUser {
+  id: string;
+  username: string;
+  name: string;
+  role: UserRole;
+}
+
 /** Seeded inspector / supervisor identity. */
 export interface User {
   id: string;
+  username: string;
   name: string;
   role: UserRole;
 }

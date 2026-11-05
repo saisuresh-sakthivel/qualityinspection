@@ -6,6 +6,10 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    serverActions: { bodySizeLimit: "8mb" },
+    proxyClientMaxBodySize: "8mb",
+  },
   turbopack: {
     rules: {
       "*.css": {

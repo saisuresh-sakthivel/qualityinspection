@@ -63,7 +63,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Database
 
-Prisma schema: `prisma/schema.prisma`. Seed script: `prisma/seed.ts` (Step 1 users + batches).
+Prisma schema: `prisma/schema.prisma`. Seed script: `prisma/seed.ts`.
 
 ```bash
 npx prisma generate
@@ -73,12 +73,26 @@ npm run db:seed
 
 Seed creates:
 
-| Kind  | Data |
-|-------|------|
-| Users | Priya Singh (`QUALITY_ENGINEER`), Alex Chen (`PRODUCTION_SUPERVISOR`) |
-| Batches | `BATCH-001` Steel Bracket — Model X200 / Line 3; `BATCH-002` Aluminum Housing — Model H50 / Line 1 |
+| Kind | Data |
+|------|------|
+| Users | `priya` / `engineer` — Priya Singh, Quality Engineer. `alex` / `supervisor` — Alex Chen, Production Supervisor. |
+| Batches | `BATCH-001` Steel Bracket — Model X200 / Line 3 (from the brief). `BATCH-002` Aluminum Housing — Model H50 / Line 1. |
 
-Re-running `npm run db:seed` upserts the same rows (idempotent).
+Re-running `npm run db:seed` upserts the same rows.
+
+## Login and roles
+
+Open [http://localhost:3000/login](http://localhost:3000/login).
+
+- Quality Engineer can create batches, upload a photo, and save an inspection.
+- Production Supervisor can open the inspection list and dashboard only.
+- Those restrictions are enforced on `POST /api/batches`, `POST /api/inspections/classify`, and `POST /api/inspections` (403), not only in the UI.
+
+Set `AUTH_SECRET` in `.env` before logging in. Set `OPENAI_API_KEY` before analyzing a photo. The vision model is OpenAI `gpt-4o-mini` (low cost per image; a handful of test photos stays on the free/low-cost tier).
+
+## Still to build
+
+Inspection list filters, KPI dashboard, Vitest, and the pre-commit hook.
 
 ## Stack
 

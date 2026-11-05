@@ -5,25 +5,64 @@
   },
   "Nav": {
     "home": "Home",
+    "batches": "Batches",
     "newInspection": "New inspection",
     "inspections": "Inspections",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "login": "Log in",
+    "logout": "Log out"
   },
   "Home": {
     "heading": "Quality Inspection",
     "description": "Inspect production batches with vision AI, then accept or override the prediction before saving.",
+    "batchesCta": "Manage batches",
     "startCta": "Start inspection",
     "viewListCta": "View inspections",
-    "prereqNote": "Postgres must be running before database features work. See README prerequisites."
+    "dashboardCta": "Dashboard",
+    "signedInAs": "Signed in as {name} ({role})"
   },
   "Role": {
-    "label": "Acting as",
-    "qualityEngineer": "Quality Engineer",
-    "productionSupervisor": "Production Supervisor"
+    "QUALITY_ENGINEER": "Quality Engineer",
+    "PRODUCTION_SUPERVISOR": "Production Supervisor"
+  },
+  "Auth": {
+    "screenTitle": "Quality Inspection: AI-Assisted Defect Classification",
+    "loginHeading": "Log in",
+    "loginDescription": "Use a seeded demo account. Access depends on the role stored for that user.",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Log in",
+    "hint": "Quality Engineer: priya / engineer. Production Supervisor: alex / supervisor.",
+    "invalid": "Username or password is incorrect.",
+    "forbiddenHeading": "Not allowed",
+    "forbidden": "A Production Supervisor can view inspections and the dashboard, but cannot create batches or log inspections."
+  },
+  "Batch": {
+    "heading": "Batches",
+    "description": "Select a batch to inspect, or create one. Only a Quality Engineer can create batches.",
+    "id": "Batch ID",
+    "idHint": "Example: BATCH-003",
+    "productName": "Product name",
+    "productionLine": "Production line",
+    "create": "Create batch",
+    "inspect": "Inspect",
+    "empty": "No batches yet."
   },
   "Inspection": {
     "newHeading": "New inspection",
-    "placeholder": "Inspection flow (upload → predict → accept/override) will land here.",
+    "newDescription": "Upload a photo. The vision model suggests a defect type before anything is saved.",
+    "batch": "Batch",
+    "image": "Unit photo",
+    "analyze": "Analyze photo",
+    "prediction": "AI prediction",
+    "confidence": "Confidence",
+    "confidenceValue": "{value}%",
+    "finalType": "Final defect type",
+    "comments": "Comments",
+    "save": "Save inspection",
+    "saved": "Inspection saved.",
+    "chooseBatch": "Select a batch",
+    "chooseType": "Choose a defect type",
     "listHeading": "Inspections",
     "listPlaceholder": "Inspection list and filters will land here."
   },
@@ -37,5 +76,17 @@
     "Paint Issue": "Paint Issue",
     "Missing Component": "Missing Component",
     "No Defect": "No Defect"
+  },
+  "Errors": {
+    "unauthorized": "Sign in required.",
+    "forbidden": "Your role cannot perform this action.",
+    "invalidInput": "Check the form and try again.",
+    "batchNotFound": "That batch does not exist.",
+    "batchExists": "A batch with this ID already exists.",
+    "unsupportedImage": "Upload a JPEG, PNG, or WebP image under 6 MB.",
+    "missingApiKey": "Set OPENAI_API_KEY in .env before analyzing photos.",
+    "visionFailed": "The vision service did not respond. Try again.",
+    "predictionInvalid": "The model output did not match a defect type. Choose the final type yourself.",
+    "generic": "Something went wrong. Try again."
   }
 }

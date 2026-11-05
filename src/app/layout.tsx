@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import { AppHeader } from "@/components/AppHeader";
 import "./globals.css";
+
+/**
+ * Session reads cookies, so the shell cannot be fully static.
+ */
+export const instant = false;
 
 /**
  * Builds root document metadata from the message catalog.
@@ -28,7 +32,6 @@ export default async function RootLayout({
     <html lang={locale} className="h-full antialiased">
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
-          <AppHeader />
           {children}
         </NextIntlClientProvider>
       </body>

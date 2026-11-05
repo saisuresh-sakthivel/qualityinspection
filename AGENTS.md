@@ -48,14 +48,15 @@ Follow these rules for every change in this repository.
 - Validate AI / API payloads with Zod where constrained output matters.
 - Never overwrite AI prediction fields when a human overrides.
 
-## Auth (lightweight)
+## Auth
 
-- In-app role switcher with seeded users is enough.
-- Enforce `QUALITY_ENGINEER` on the server for create/update inspection paths. UI hiding alone is not enough.
+- Login screen with two seeded users. No OAuth, signup, or invites.
+- Session cookie is set only after a successful login and cleared on logout.
+- Enforce `QUALITY_ENGINEER` on the server for batch create and inspection classify/save. UI hiding alone is not enough.
+- Production Supervisor may view list and dashboard only.
 
 ## Out of scope unless asked
 
-- Full auth product (OAuth, signup, invites).
+- Full auth product (OAuth, signup, invites, password reset).
 - Python / FastAPI services.
-- Migrations or seed runs unless the user explicitly asks.
-- NL reporting, batch CRUD beyond seed data, retry queues.
+- NL reporting, batch edit/close workflows, retry queues.

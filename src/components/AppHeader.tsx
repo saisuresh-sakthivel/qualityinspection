@@ -1,13 +1,16 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { RoleSwitcher } from "@/components/RoleSwitcher";
+import { logout } from "@/app/login/actions";
+import { getCurrentUser } from "@/lib/auth";
 
 /**
- * Top navigation bar shared across App Router pages.
+ * Top navigation. Inspection and batch links are hidden for supervisors; the API still rejects them.
  */
 export async function AppHeader() {
   const t = await getTranslations("Nav");
   const tApp = await getTranslations("App");
+  const user = await getCurrentUser();
+  const isEngineer = user?.role === "QUALITY_ENGINEER";
 
   return (
     <header className="border-b border-border bg-muted">
@@ -16,14 +19,27 @@ export async function AppHeader() {
           <Link href="/" className="text-lg font-semibold text-foreground">
             {tApp("title")}
           </Link>
-          <nav className="flex gap-4 text-sm">
-            <Link href="/">{t("home")}</Link>
-            <Link href="/inspections/new">{t("newInspection")}</Link>
-            <Link href="/inspections">{t("inspections")}</Link>
-            <Link href="/dashboard">{t("dashboard")}</Link>
-          </nav>
+          {user ? (
+            <nav className="flex gap-4 text-sm">
+              <Link href="/">{t("home")}</Link>
+              {isEngineer ? <Link href="/batches">{t("batches")}</Link> : null}
+              {isEngineer ? (
+                <Link href="/inspections/new">{t("newInspection")}</Link>
+              ) : null}
+              <Link href="/inspections">{t("inspections")}</Link>
+              <Link href="/dashboard">{t("dashboard")}</Link>
+            </nav>
+          ) : null}
         </div>
-        <RoleSwitcher />
+        {user ? (
+          <form action={logout}>
+            <button className="btn-secondary" type="submit">
+              {t("logout")}
+            </button>
+          </form>
+        ) : (
+          <Link href="/login">{t("login")}</Link>
+        )}
       </div>
     </header>
   );

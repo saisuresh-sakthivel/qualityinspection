@@ -1,24 +1,29 @@
 import { PrismaClient, UserRole } from "@prisma/client";
+import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
 
-/** Demo users used by the lightweight role switcher (brief §4). */
+/** Demo logins. Passwords are hashed before insert. */
 const USERS = [
   {
     id: "user_qe_priya",
+    username: "priya",
     name: "Priya Singh",
+    password: "engineer",
     role: UserRole.QUALITY_ENGINEER,
   },
   {
     id: "user_ps_alex",
+    username: "alex",
     name: "Alex Chen",
+    password: "supervisor",
     role: UserRole.PRODUCTION_SUPERVISOR,
   },
 ] as const;
 
 /**
- * Example batches for Step 1 — attach inspections to these IDs.
- * BATCH-001 matches the brief; BATCH-002 is a second fixture for multi-batch demos.
+ * Step 1 fixtures. BATCH-001 matches the requirement example.
+ * BATCH-002 is the second batch so inspections can be attached to more than one line.
  */
 const BATCHES = [
   {
@@ -34,14 +39,26 @@ const BATCHES = [
 ] as const;
 
 /**
- * Upserts seeded users so re-running the script is safe.
+ * Upserts seeded users so re-running the script refreshes credentials.
  */
 async function seedUsers() {
   for (const user of USERS) {
+    const passwordHash = hashPassword(user.password);
     await prisma.user.upsert({
       where: { id: user.id },
-      update: { name: user.name, role: user.role },
-      create: { id: user.id, name: user.name, role: user.role },
+      update: {
+        username: user.username,
+        name: user.name,
+        role: user.role,
+        passwordHash,
+      },
+      create: {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        role: user.role,
+        passwordHash,
+      },
     });
   }
 }
@@ -67,7 +84,7 @@ async function seedBatches() {
 }
 
 /**
- * Seeds demo users and batches required before the inspection flow.
+ * Seeds demo users and batches required before login and inspection.
  */
 async function main() {
   await seedUsers();
@@ -75,9 +92,9 @@ async function main() {
 
   console.log("Seed complete:");
   console.log(
-    `  users: ${USERS.map((u) => `${u.name} (${u.role})`).join(", ")}`,
+    `  users: ${USERS.map((user) => `${user.username} (${user.role})`).join(", ")}`,
   );
-  console.log(`  batches: ${BATCHES.map((b) => b.id).join(", ")}`);
+  console.log(`  batches: ${BATCHES.map((batch) => batch.id).join(", ")}`);
 }
 
 main()
