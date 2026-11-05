@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: qualityinspection-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: qi
+      POSTGRES_PASSWORD: qi
+      POSTGRES_DB: qualityinspection
+    volumes:
+      - qi_pg_data:/var/lib/postgresql/data
+
+volumes:
+  qi_pg_data:

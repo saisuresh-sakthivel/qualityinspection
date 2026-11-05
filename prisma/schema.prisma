@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  QUALITY_ENGINEER
+  PRODUCTION_SUPERVISOR
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  role        UserRole
+  inspections Inspection[]
+  createdAt   DateTime     @default(now())
+}
+
+model Batch {
+  id             String       @id
+  productName    String
+  productionLine String
+  inspections    Inspection[]
+  createdAt      DateTime     @default(now())
+}
+
+/// Defect taxonomy is enforced in TypeScript/Zod, not as a Prisma enum.
+model Inspection {
+  id                    String   @id @default(cuid())
+  batchId               String
+  batch                 Batch    @relation(fields: [batchId], references: [id])
+  imagePath             String
+  aiPredictedDefectType String?
+  aiConfidence          Float?
+  finalDefectType       String
+  wasOverridden         Boolean
+  comments              String?
+  inspectorId           String
+  inspector             User     @relation(fields: [inspectorId], references: [id])
+  inspectedAt           DateTime @default(now())
+
+  @@index([batchId])
+  @@index([finalDefectType])
+  @@index([wasOverridden])
+}

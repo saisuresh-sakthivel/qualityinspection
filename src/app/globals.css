@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+:root {
+  /* Colors — white + light blue theme */
+  --color-bg: #ffffff;
+  --color-bg-muted: #f0f7fc;
+  --color-surface: #ffffff;
+  --color-border: #c5dff0;
+  --color-primary: #3b82b5;
+  --color-primary-hover: #2f6a94;
+  --color-text: #1a2b3c;
+  --color-text-muted: #5a7a94;
+  --color-accent: #d6ebf7;
+
+  /* Font sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+  --font-size-hero: 2.25rem;
+
+  --font-sans: "Segoe UI", system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-muted: var(--color-bg-muted);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-text-muted: var(--color-text-muted);
+  --color-accent: var(--color-accent);
+  --font-sans: var(--font-sans);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+}
+
+h1 {
+  font-size: var(--font-size-hero);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+p {
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+
+.text-xs {
+  font-size: var(--font-size-xs);
+}
+
+.text-lg {
+  font-size: var(--font-size-lg);
+}

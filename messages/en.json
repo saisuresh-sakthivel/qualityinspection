@@ -1,0 +1,41 @@
+{
+  "App": {
+    "title": "Quality Inspection",
+    "tagline": "Human-in-the-loop visual inspection"
+  },
+  "Nav": {
+    "home": "Home",
+    "newInspection": "New inspection",
+    "inspections": "Inspections",
+    "dashboard": "Dashboard"
+  },
+  "Home": {
+    "heading": "Quality Inspection",
+    "description": "Inspect production batches with vision AI, then accept or override the prediction before saving.",
+    "startCta": "Start inspection",
+    "viewListCta": "View inspections",
+    "prereqNote": "Postgres must be running before database features work. See README prerequisites."
+  },
+  "Role": {
+    "label": "Acting as",
+    "qualityEngineer": "Quality Engineer",
+    "productionSupervisor": "Production Supervisor"
+  },
+  "Inspection": {
+    "newHeading": "New inspection",
+    "placeholder": "Inspection flow (upload → predict → accept/override) will land here.",
+    "listHeading": "Inspections",
+    "listPlaceholder": "Inspection list and filters will land here."
+  },
+  "Dashboard": {
+    "heading": "Dashboard",
+    "placeholder": "KPI dashboard will land here."
+  },
+  "DefectType": {
+    "Scratch": "Scratch",
+    "Dent": "Dent",
+    "Paint Issue": "Paint Issue",
+    "Missing Component": "Missing Component",
+    "No Defect": "No Defect"
+  }
+}
