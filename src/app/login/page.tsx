@@ -3,7 +3,7 @@ import { LoginBrand } from "@/components/LoginBrand";
 import { LoginForm } from "@/components/LoginForm";
 
 /**
- * Login screen. A signed-in visitor is redirected to home by proxy.ts.
+ * Login screen. A signed-in visitor is redirected to the batch list by proxy.ts.
  */
 export default async function LoginPage() {
   const t = await getTranslations("Auth");

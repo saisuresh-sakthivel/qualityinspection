@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { VisionProviderError } from "@/domain/errors";
 import { AuthError } from "@/lib/auth";
 import { ZodError } from "zod";
 
@@ -11,9 +12,12 @@ export function errorResponse(status: number, code: string): NextResponse {
 
 /**
  * Turns auth and validation failures into HTTP responses.
- * Unknown errors stay generic so provider details are not leaked.
+ * A vision provider error is returned unchanged. Other unknown errors stay generic.
  */
 export function toErrorResponse(error: unknown): NextResponse {
+  if (error instanceof VisionProviderError) {
+    return NextResponse.json(error.body, { status: error.status });
+  }
   if (error instanceof AuthError) {
     return errorResponse(error.status, error.message);
   }

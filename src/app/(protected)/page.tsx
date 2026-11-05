@@ -1,22 +1,8 @@
-import { getTranslations } from "next-intl/server";
-import { HomeActions } from "@/components/HomeActions";
-import { PageShell } from "@/components/PageShell";
-import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 /**
- * Landing page after login. Anonymous visitors are redirected by proxy.ts.
+ * There is no home screen. Signed-in visits to `/` continue to the batch list.
  */
-export default async function HomePage() {
-  const user = await getCurrentUser();
-  if (!user) {
-    return null;
-  }
-
-  const t = await getTranslations("Home");
-
-  return (
-    <PageShell title={t("heading")} description={t("description")}>
-      <HomeActions user={user} />
-    </PageShell>
-  );
+export default function HomePage() {
+  redirect("/batches");
 }

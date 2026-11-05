@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { AppHeader } from "@/components/AppHeader";
 import "./globals.css";
 
 /**
@@ -32,6 +34,9 @@ export default async function RootLayout({
     <html lang={locale} className="h-full antialiased">
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
+          <Suspense fallback={null}>
+            <AppHeader />
+          </Suspense>
           {children}
         </NextIntlClientProvider>
       </body>

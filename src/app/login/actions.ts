@@ -27,7 +27,7 @@ export async function login(
   }
 
   await setSession(user.id);
-  redirect("/");
+  redirect("/batches");
 }
 
 /**

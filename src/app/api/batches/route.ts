@@ -7,28 +7,47 @@ import { getPrisma } from "@/lib/db";
 import type { Batch } from "@/types/models";
 
 /**
- * Batches that have no inspection yet. Used by the log-inspection dialog.
+ * Every batch, including ones that already have inspections.
+ * A batch can hold any number of unit inspections.
  */
-export async function listUninspectedBatches(): Promise<Batch[]> {
+export async function listBatches(): Promise<Batch[]> {
   const batches = await getPrisma().batch.findMany({
-    where: { inspections: { none: {} } },
     orderBy: { id: "asc" },
   });
 
-  return batches.map((batch) => ({
-    id: batch.id,
-    productName: batch.productName,
-    productionLine: batch.productionLine,
-  }));
+  return batches.map(toBatch);
 }
 
 /**
- * Lists batches with no inspection. Quality Engineers only.
+ * One batch for the inspection steps page. Missing ids return null.
+ */
+export async function getBatch(id: string): Promise<Batch | null> {
+  const batch = await getPrisma().batch.findUnique({ where: { id } });
+  return batch ? toBatch(batch) : null;
+}
+
+/**
+ * Keeps the public batch shape free of Prisma fields.
+ */
+function toBatch(batch: {
+  id: string;
+  productName: string;
+  productionLine: string;
+}): Batch {
+  return {
+    id: batch.id,
+    productName: batch.productName,
+    productionLine: batch.productionLine,
+  };
+}
+
+/**
+ * Lists batches. Quality Engineers only.
  */
 export async function GET(): Promise<NextResponse> {
   try {
     await requireRole("QUALITY_ENGINEER");
-    return NextResponse.json(await listUninspectedBatches());
+    return NextResponse.json(await listBatches());
   } catch (error) {
     return toErrorResponse(error);
   }

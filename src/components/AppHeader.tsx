@@ -1,43 +1,51 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { AppNav } from "@/components/AppNav";
 import { logout } from "@/app/login/actions";
 import { getCurrentUser } from "@/lib/auth";
 
 /**
- * Top navigation. Inspection and batch links are hidden for supervisors; the API still rejects them.
+ * The header shows the given name, such as "Priya" from "Priya Singh".
+ */
+function givenName(fullName: string): string {
+  const [first] = fullName.trim().split(/\s+/);
+  return first || fullName;
+}
+
+/**
+ * Global header. Logout, the role, and the menus appear only after sign-in.
  */
 export async function AppHeader() {
   const t = await getTranslations("Nav");
   const tApp = await getTranslations("App");
+  const tRole = await getTranslations("Role");
   const user = await getCurrentUser();
-  const isEngineer = user?.role === "QUALITY_ENGINEER";
 
   return (
-    <header className="border-b border-border bg-muted">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="text-lg font-semibold text-foreground">
-            {tApp("title")}
-          </Link>
-          {user ? (
-            <nav className="flex gap-4 text-sm">
-              <Link href="/">{t("home")}</Link>
-              {isEngineer ? <Link href="/batches">{t("batches")}</Link> : null}
-              <Link href="/inspections">{t("inspections")}</Link>
-              <Link href="/dashboard">{t("dashboard")}</Link>
-            </nav>
-          ) : null}
-        </div>
-        {user ? (
+    <header className="app-header">
+      <div className="app-brand">
+        <Link href={user ? "/batches" : "/login"} className="app-brand-title">
+          {tApp("title")}
+        </Link>
+        {user ? <p className="app-brand-role">{tRole(user.role)}</p> : null}
+      </div>
+      {user ? (
+        <AppNav />
+      ) : (
+        <span />
+      )}
+      {user ? (
+        <div className="app-header-actions">
+          <span className="app-header-name">{givenName(user.name)}</span>
           <form action={logout}>
             <button className="btn-secondary" type="submit">
               {t("logout")}
             </button>
           </form>
-        ) : (
-          <Link href="/login">{t("login")}</Link>
-        )}
-      </div>
+        </div>
+      ) : (
+        <span />
+      )}
     </header>
   );
 }

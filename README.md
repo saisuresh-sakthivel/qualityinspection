@@ -88,7 +88,7 @@ Open [http://localhost:3000/login](http://localhost:3000/login).
 - Production Supervisor can open the inspection list and dashboard only.
 - Those restrictions are enforced on `POST /api/batches`, `POST /api/inspections/classify`, and `POST /api/inspections` (403), not only in the UI.
 
-Set `AUTH_SECRET` in `.env` before logging in. Set `OPENAI_API_KEY` before analyzing a photo. The vision model is OpenAI `gpt-4o-mini` (low cost per image; a handful of test photos stays on the free/low-cost tier).
+Set `AUTH_SECRET` in `.env` before logging in. Set `GEMINI_API_KEY` before analyzing a photo. The vision model is Gemini `gemini-flash-latest`, called with the `X-goog-api-key` header.
 
 ## Still to build
 

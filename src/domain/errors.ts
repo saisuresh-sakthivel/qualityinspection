@@ -1,3 +1,17 @@
+/**
+ * Gemini (or another provider) rejected the call. The body is returned as-is
+ * so the client sees the provider status instead of a rewritten app code.
+ */
+export class VisionProviderError extends Error {
+  constructor(
+    readonly status: number,
+    readonly body: unknown,
+  ) {
+    super("VISION_FAILED");
+    this.name = "VisionProviderError";
+  }
+}
+
 type ErrorMessageKey =
   | "unauthorized"
   | "forbidden"

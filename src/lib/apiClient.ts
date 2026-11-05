@@ -8,6 +8,8 @@ export class ApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly code: string,
+    /** Provider text, such as Gemini's high-demand message. */
+    public readonly detail?: string,
   ) {
     super(code);
     this.name = "ApiError";
@@ -16,6 +18,9 @@ export class ApiError extends Error {
 
 interface ErrorBody {
   code?: string;
+  error?: {
+    message?: string;
+  };
 }
 
 interface ClassifyResponse {
@@ -41,15 +46,19 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, init);
   if (!response.ok) {
     let code = "GENERIC";
+    let detail: string | undefined;
     try {
       const body = (await response.json()) as ErrorBody;
       if (body.code) {
         code = body.code;
       }
+      if (body.error?.message) {
+        detail = body.error.message;
+      }
     } catch {
       // A non-JSON body still becomes an ApiError for the caller.
     }
-    throw new ApiError(response.status, code);
+    throw new ApiError(response.status, code, detail);
   }
 
   return (await response.json()) as T;

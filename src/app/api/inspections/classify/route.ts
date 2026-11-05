@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { classifyUnitImage } from "@/ai/classify";
+// Switch providers by importing classifyUnitImage from "@/ai/openai" instead.
+import { classifyUnitImage } from "@/ai/openai";
 import { errorResponse, toErrorResponse } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
 import { getPrisma } from "@/lib/db";

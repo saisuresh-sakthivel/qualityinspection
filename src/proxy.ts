@@ -13,7 +13,7 @@ export function proxy(request: NextRequest) {
 
   if (pathname === "/login") {
     if (signedIn) {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/batches", request.url));
     }
     return NextResponse.next();
   }
