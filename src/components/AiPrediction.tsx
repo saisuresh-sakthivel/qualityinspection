@@ -19,7 +19,7 @@ export function AiPrediction({ defectType, confidence }: AiPredictionProps) {
   const percent = Math.round(confidence * 100);
 
   return (
-    <div className="mx-auto flex w-fit flex-col items-center gap-4 rounded-md border border-on-primary p-5">
+    <div className="mx-auto flex w-fit flex-col items-center gap-4 rounded-md border border-on-primary p-7.5">
       <div className="inline-flex items-center gap-2">
         <Sparkles className="size-4 text-primary" aria-hidden="true" />
         <p className="m-0 font-semibold">{t("aiInspector")}</p>

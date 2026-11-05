@@ -64,7 +64,7 @@
     "listHeading": "Inspections",
     "listDescription": "Logged inspections, with the final defect type and whether the engineer accepted the AI prediction.",
     "loading": "Loading inspections…",
-    "logInspection": "Inspection steps",
+    "logInspection": "Log inspection",
     "stepsTitle": "Inspection steps",
     "stepsFor": "{batch} · {product}",
     "stepUpload": "Step 1",

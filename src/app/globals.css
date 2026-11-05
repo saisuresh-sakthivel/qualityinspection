@@ -58,44 +58,19 @@
   color: var(--color-text-muted);
 }
 
-/* React ViewTransition classes for the inspection steps. */
-::view-transition-group(.step-resize) {
-  animation-duration: 350ms;
-  animation-timing-function: ease;
+/* Clips a step body, then opens it after the prediction is already in the DOM. */
+.step-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 350ms ease;
 }
 
-::view-transition-old(.step-resize),
-::view-transition-new(.step-resize) {
-  animation: none;
-  height: 100%;
-}
-
-::view-transition-old(.step-exit) {
-  animation: 350ms ease both vt-step-exit;
-}
-
-::view-transition-new(.step-enter) {
-  animation: 350ms ease both vt-step-enter;
-}
-
-@keyframes vt-step-exit {
-  to {
-    opacity: 0;
-    transform: translateY(-0.5rem);
-  }
-}
-
-@keyframes vt-step-enter {
-  from {
-    opacity: 0;
-    transform: translateY(0.5rem);
-  }
+.step-panel[data-open="true"] {
+  grid-template-rows: 1fr;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(.step-resize),
-  ::view-transition-old(.step-exit),
-  ::view-transition-new(.step-enter) {
-    animation: none;
+  .step-panel {
+    transition: none;
   }
 }

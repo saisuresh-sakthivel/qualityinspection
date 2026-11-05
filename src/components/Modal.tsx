@@ -14,7 +14,7 @@ interface ModalProps {
   onSubmit?: () => void;
   submitLabel?: string;
   submitDisabled?: boolean;
-  /** Extra footer action placed beside Close, such as Inspection steps. */
+  /** Extra footer action placed beside Close, such as Log inspection. */
   footer?: ReactNode;
   /** Stacks a later dialog above an earlier one. */
   layer?: 1 | 2 | 3;

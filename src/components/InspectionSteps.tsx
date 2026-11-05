@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useState, ViewTransition, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode, type Ref } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronUp } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -24,6 +24,7 @@ interface ClassifyResult {
 }
 
 type Confirming = "allow" | "deny";
+type StepId = "upload" | "prediction";
 
 /**
  * Prefers the provider message over the generic code map.
@@ -40,7 +41,8 @@ function inspectionErrorMessage(
 }
 
 /**
- * Two inspection steps. The prediction step stays closed until analysis succeeds.
+ * Two inspection steps. One can be expanded while the other stays docked.
+ * Step 2 stays locked until a prediction is rendered into it.
  */
 export function InspectionSteps({ batchId }: InspectionStepsProps) {
   const t = useTranslations("Inspection");
@@ -50,6 +52,7 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
 
   const [file, setFile] = useState<File | null>(null);
   const [review, setReview] = useState<ClassifyResult | null>(null);
+  const [openStep, setOpenStep] = useState<StepId | null>("upload");
   const [category, setCategory] = useState<DefectType | "">("");
   const [comments, setComments] = useState("");
   const [pending, setPending] = useState(false);
@@ -58,6 +61,8 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
   const [categoryRequired, setCategoryRequired] = useState(false);
   const [showOverride, setShowOverride] = useState(false);
   const [confirming, setConfirming] = useState<Confirming | null>(null);
+  const predictionBodyRef = useRef<HTMLDivElement>(null);
+  const expandPrediction = useRef(false);
 
   const predicted = review?.prediction?.predictedDefectType ?? null;
   const uploadDone = review !== null;
@@ -69,7 +74,19 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
         : "";
 
   /**
-   * Sends the photo to classify. A successful response docks upload and opens prediction.
+   * Opens the clicked step and docks the other. A second click docks the open step.
+   * Step 2 stays locked until analysis has rendered a prediction into it.
+   */
+  function toggleStep(step: StepId) {
+    if (step === "prediction" && !review) {
+      return;
+    }
+    setOpenStep((current) => (current === step ? null : step));
+  }
+
+  /**
+   * Sends the photo to classify. The prediction is written into step 2 while that
+   * step stays docked; expansion starts only after that content is in the DOM.
    */
   async function analyze() {
     if (!file) {
@@ -82,21 +99,43 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
       formData.set("batchId", batchId);
       formData.set("image", file);
       const body = await classifyInspection(formData);
-      startTransition(() => {
-        setReview({ imageId: body.imageId, prediction: body.prediction });
-        setCategory("");
-        setComments("");
-        setSameCategory(false);
-        setCategoryRequired(false);
-        setShowOverride(false);
-        setConfirming(null);
-        setPending(false);
-      });
+      expandPrediction.current = true;
+      setReview({ imageId: body.imageId, prediction: body.prediction });
+      setCategory("");
+      setComments("");
+      setSameCategory(false);
+      setCategoryRequired(false);
+      setShowOverride(false);
+      setConfirming(null);
+      setPending(false);
     } catch (caught) {
       setError(inspectionErrorMessage(caught, (key) => tErrors(key)));
       setPending(false);
     }
   }
+
+  useLayoutEffect(() => {
+    if (!expandPrediction.current || !review) {
+      return;
+    }
+    const body = predictionBodyRef.current;
+    if (!body?.querySelector("[data-prediction]")) {
+      return;
+    }
+    // The docked step has to paint with the prediction inside it. Expanding in the
+    // same frame skips the transition and opens onto an empty snapshot.
+    let painted = 0;
+    const laidOut = requestAnimationFrame(() => {
+      painted = requestAnimationFrame(() => {
+        expandPrediction.current = false;
+        setOpenStep("prediction");
+      });
+    });
+    return () => {
+      cancelAnimationFrame(laidOut);
+      cancelAnimationFrame(painted);
+    };
+  }, [review]);
 
   /**
    * Keeps the model label and asks the engineer to confirm it.
@@ -184,70 +223,56 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
   return (
     <>
       <div className="flex max-w-2xl flex-col overflow-hidden rounded-lg border border-border bg-surface">
-        <ViewTransition update="step-resize">
-          <StepSection
-            title={t("stepUpload")}
-            hint={uploadDone ? (file?.name ?? t("stepUploadHint")) : t("stepUploadHint")}
-            state={uploadDone ? "done" : "open"}
-            transitionName="inspection-upload"
-          >
-            <Form
-              className="flex w-full flex-col gap-4"
-              error={error}
-              schema={[
-                {
-                  name: "image",
-                  type: "file",
-                  label: t("dropTitle"),
-                  hint: t("dropHint"),
-                  buttonLabel: t("selectFile"),
-                  clearLabel: t("removePhoto"),
-                  accept: "image/jpeg,image/png,image/webp",
-                },
-              ]}
-              onChange={(_name, value) => {
-                setFile(value instanceof File ? value : null);
-                setError(null);
-              }}
-              onSubmit={{
-                label: pending ? t("analyzing") : t("analyze"),
-                onClick: analyze,
-                disabled: pending || !file,
-                className: "mx-auto",
-              }}
-            />
-          </StepSection>
-        </ViewTransition>
+        <StepSection
+          title={t("stepUpload")}
+          hint={uploadDone ? (file?.name ?? t("stepUploadHint")) : t("stepUploadHint")}
+          open={openStep === "upload"}
+          panelId="inspection-upload-panel"
+          onToggle={() => toggleStep("upload")}
+        >
+          <Form
+            className="flex w-full flex-col gap-4"
+            error={error}
+            schema={[
+              {
+                name: "image",
+                type: "file",
+                label: t("dropTitle"),
+                hint: t("dropHint"),
+                buttonLabel: t("selectFile"),
+                clearLabel: t("removePhoto"),
+                accept: "image/jpeg,image/png,image/webp",
+              },
+            ]}
+            onChange={(_name, value) => {
+              setFile(value instanceof File ? value : null);
+              setError(null);
+            }}
+            onSubmit={{
+              label: pending ? t("analyzing") : t("analyze"),
+              onClick: analyze,
+              disabled: pending || !file,
+              className: "mx-auto",
+            }}
+          />
+        </StepSection>
 
-        <ViewTransition update="step-resize">
-          <StepSection
-            title={t("stepPrediction")}
-            hint={uploadDone ? t("stepPredictionHint") : t("stepPredictionLocked")}
-            state={uploadDone ? "open" : "locked"}
-            transitionName="inspection-prediction"
-          >
-            <div className="flex flex-col items-center gap-4">
+        <StepSection
+          title={t("stepPrediction")}
+          hint={uploadDone ? t("stepPredictionHint") : t("stepPredictionLocked")}
+          open={openStep === "prediction"}
+          locked={!uploadDone}
+          panelId="inspection-prediction-panel"
+          bodyRef={predictionBodyRef}
+          onToggle={() => toggleStep("prediction")}
+        >
+          {uploadDone ? (
+            <div className="flex flex-col items-center gap-4" data-prediction="">
               {predicted && review?.prediction ? (
                 <AiPrediction defectType={predicted} confidence={review.prediction.confidence} />
               ) : (
                 <p className="text-sm text-danger">{tErrors("predictionInvalid")}</p>
               )}
-              <div className="flex items-center gap-3">
-                <StyledButton
-                  variant="primary"
-                  disabled={!predicted || pending}
-                  onClick={acceptPrediction}
-                >
-                  {t("allow")}
-                </StyledButton>
-                <StyledButton
-                  variant="secondary"
-                  disabled={!predicted || pending}
-                  onClick={() => setShowOverride(true)}
-                >
-                  {t("deny")}
-                </StyledButton>
-              </div>
               {showOverride ? (
                 <Form
                   className="flex w-full max-w-xl flex-col gap-4"
@@ -265,20 +290,37 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
                     setComments(value);
                   }}
                   onSubmit={{
-                    label: t("acceptPrediction"),
-                    onClick: acceptPrediction,
-                    disabled: !predicted || pending,
-                  }}
-                  onCancel={{
                     label: t("overwrite"),
                     onClick: overwrite,
                     disabled: pending,
                   }}
+                  onCancel={{
+                    label: t("acceptPrediction"),
+                    onClick: acceptPrediction,
+                    disabled: !predicted || pending,
+                  }}
                 />
-              ) : null}
+              ) : (
+                <div className="flex items-center gap-3">
+                  <StyledButton
+                    variant="primary"
+                    disabled={!predicted || pending}
+                    onClick={acceptPrediction}
+                  >
+                    {t("allow")}
+                  </StyledButton>
+                  <StyledButton
+                    variant="secondary"
+                    disabled={!predicted || pending}
+                    onClick={() => setShowOverride(true)}
+                  >
+                    {t("deny")}
+                  </StyledButton>
+                </div>
+              )}
             </div>
-          </StepSection>
-        </ViewTransition>
+          ) : null}
+        </StepSection>
       </div>
 
       {confirming && isDefectType(finalType) ? (
@@ -307,46 +349,59 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
 }
 
 /**
- * One accordion row. Locked and finished rows stay collapsed.
+ * One accordion row. The header expands or docks the body. A locked row cannot open.
  */
 function StepSection({
   title,
   hint,
-  state,
-  transitionName,
+  open,
+  locked = false,
+  panelId,
+  bodyRef,
+  onToggle,
   children,
 }: {
   title: string;
   hint: string;
-  state: "open" | "done" | "locked";
-  /** Stable view-transition name so this step can enter and exit on its own. */
-  transitionName: string;
+  open: boolean;
+  locked?: boolean;
+  panelId: string;
+  bodyRef?: Ref<HTMLDivElement>;
+  onToggle: () => void;
   children?: ReactNode;
 }) {
-  const Icon = state === "open" ? ChevronUp : ChevronRight;
+  const Icon = open ? ChevronUp : ChevronRight;
+  const headingId = `${panelId}-heading`;
 
   return (
     <section
-      className="border-t border-border px-6 py-5 first:border-t-0 data-[state=locked]:bg-muted"
-      data-state={state}
-      aria-disabled={state === "locked"}
+      className="border-t border-border px-6 py-5 first:border-t-0 data-[locked=true]:bg-muted"
+      data-locked={locked ? "true" : undefined}
+      aria-labelledby={headingId}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          {state === "open" ? (
-            <h2 className="m-0 text-xl font-semibold">{title}</h2>
-          ) : (
-            <p className="m-0 text-lg font-semibold text-foreground">{title}</p>
-          )}
-          <p className="text-sm">{hint}</p>
+      <h2 id={headingId} className="m-0">
+        <button
+          type="button"
+          className="flex w-full cursor-pointer items-start justify-between gap-4 border-0 bg-transparent p-0 text-left text-foreground disabled:cursor-not-allowed"
+          aria-expanded={open}
+          aria-controls={panelId}
+          disabled={locked}
+          onClick={onToggle}
+        >
+          <span>
+            <span className={open ? "block text-xl font-semibold" : "block text-lg font-semibold"}>
+              {title}
+            </span>
+            <span className="mt-1 block text-sm font-normal">{hint}</span>
+          </span>
+          <Icon className="mt-1 shrink-0" aria-hidden="true" />
+        </button>
+      </h2>
+      <div id={panelId} className="step-panel" data-open={open ? "true" : "false"}>
+        <div ref={bodyRef} className="min-h-0 overflow-hidden" inert={open ? undefined : true}>
+          {children ? <div className="pt-4">{children}</div> : null}
         </div>
-        <Icon aria-hidden="true" />
       </div>
-      {state === "open" ? (
-        <ViewTransition name={transitionName} enter="step-enter" exit="step-exit">
-          <div className="mt-4">{children}</div>
-        </ViewTransition>
-      ) : null}
     </section>
   );
 }
