@@ -4,6 +4,7 @@ import { listInspections } from "@/app/api/inspections/route";
 import { DefectFilter } from "@/components/DefectFilter";
 import { InspectionList } from "@/components/InspectionList";
 import { PageShell } from "@/components/PageShell";
+import { PageTransition } from "@/components/PageTransition";
 import { isDefectType } from "@/domain/defects";
 import type { DefectType } from "@/types/models";
 
@@ -19,15 +20,17 @@ export default async function InspectionsPage({ searchParams }: InspectionsPageP
   const t = await getTranslations("Inspection");
 
   return (
-    <Suspense
-      fallback={
-        <PageShell title={t("listHeading")} description={t("listDescription")}>
-          <p>{t("loading")}</p>
-        </PageShell>
-      }
-    >
-      <InspectionResults searchParams={searchParams} />
-    </Suspense>
+    <PageTransition>
+      <Suspense
+        fallback={
+          <PageShell title={t("listHeading")} description={t("listDescription")}>
+            <p>{t("loading")}</p>
+          </PageShell>
+        }
+      >
+        <InspectionResults searchParams={searchParams} />
+      </Suspense>
+    </PageTransition>
   );
 }
 

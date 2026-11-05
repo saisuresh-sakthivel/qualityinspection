@@ -25,6 +25,7 @@ export function AppNav() {
           <Link
             key={item.href}
             href={item.href}
+            transitionTypes={["page-fade"]}
             aria-current={active ? "page" : undefined}
             className="rounded-md px-3 py-1.5 text-base text-foreground no-underline hover:bg-accent aria-[current=page]:bg-accent"
           >

@@ -2,6 +2,12 @@
 
 Next.js 16 + React 19 take-home app for human-in-the-loop visual quality inspection.
 
+## Project Details
+
+To give headsup the below titles are AI generated. This section is created manually for me to explain more about the project.
+
+As per the requirement i used a full stack framework for my entire task which is NextJS. leveraged gpt-4 for AI prediction. Leveraged Next 16 with React 19. Next 16 fully supports turbopack which is 10x faster than webpack.
+
 ## Prerequisites
 
 ### 1. Node.js 22
@@ -60,25 +66,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
-
-## Database
-
-Prisma schema: `prisma/schema.prisma`. Seed script: `prisma/seed.ts`.
-
-```bash
-npx prisma generate
-npx prisma migrate dev
-npm run db:seed
-```
-
-Seed creates:
-
-| Kind    | Data                                                                                                                 |
-| ------- | -------------------------------------------------------------------------------------------------------------------- |
-| Users   | `priya` / `engineer` — Priya Singh, Quality Engineer. `alex` / `supervisor` — Alex Chen, Production Supervisor.      |
-| Batches | `BATCH-001` Steel Bracket — Model X200 / Line 3 (from the brief). `BATCH-002` Aluminum Housing — Model H50 / Line 1. |
-
-Re-running `npm run db:seed` upserts the same rows.
 
 ## Login and roles
 

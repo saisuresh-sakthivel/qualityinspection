@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { LoginForm } from "@/components/LoginForm";
+import { PageTransition } from "@/components/PageTransition";
 import type { FormFieldSchema } from "@/types/form";
 
 /**
@@ -26,10 +27,12 @@ export default async function LoginPage() {
   ];
 
   return (
-    <div className="flex flex-1 flex-col text-foreground">
-      <main className="flex flex-1 items-start justify-center px-4 pb-8">
-        <LoginForm schema={schema} />
-      </main>
-    </div>
+    <PageTransition>
+      <div className="flex flex-1 flex-col text-foreground">
+        <main className="flex flex-1 items-start justify-center px-4 pb-8">
+          <LoginForm schema={schema} />
+        </main>
+      </div>
+    </PageTransition>
   );
 }

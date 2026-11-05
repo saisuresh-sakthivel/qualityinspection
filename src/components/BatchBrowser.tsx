@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BatchDetails } from "@/components/BatchDetails";
 import { Modal } from "@/components/Modal";
@@ -18,7 +20,28 @@ interface BatchBrowserProps {
 export function BatchBrowser({ batches, canLog }: BatchBrowserProps) {
   const tBatch = useTranslations("Batch");
   const t = useTranslations("Inspection");
+  const router = useRouter();
   const [selected, setSelected] = useState<Batch | null>(null);
+
+  useEffect(() => {
+    if (!selected) {
+      return;
+    }
+    router.prefetch(`/batches/${encodeURIComponent(selected.id)}/inspect`);
+  }, [router, selected]);
+
+  /**
+   * Closes the details dialog before leaving, so it is gone when inspection steps open.
+   * The route is prefetched while the dialog is open, so the fade can start immediately.
+   */
+  function logInspection(batchId: string) {
+    flushSync(() => {
+      setSelected(null);
+    });
+    router.push(`/batches/${encodeURIComponent(batchId)}/inspect`, {
+      transitionTypes: ["page-fade"],
+    });
+  }
 
   if (batches.length === 0) {
     return <p>{tBatch("empty")}</p>;
@@ -54,7 +77,7 @@ export function BatchBrowser({ batches, canLog }: BatchBrowserProps) {
               <StyledButton
                 variant="primary"
                 className="flex-1"
-                href={`/batches/${encodeURIComponent(selected.id)}/inspect`}
+                onClick={() => logInspection(selected.id)}
               >
                 {t("logInspection")}
               </StyledButton>

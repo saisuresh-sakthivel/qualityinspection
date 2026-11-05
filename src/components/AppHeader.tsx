@@ -23,9 +23,16 @@ export async function AppHeader() {
   const user = await getCurrentUser();
 
   return (
-    <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-border bg-surface px-6 py-3.5">
+    <header
+      className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-border bg-surface px-6 py-3.5"
+      style={{ viewTransitionName: "site-header" }}
+    >
       <div className="flex flex-col justify-self-start gap-0.5">
-        <Link href={user ? "/batches" : "/login"} className="flex items-center gap-2">
+        <Link
+          href={user ? "/batches" : "/login"}
+          transitionTypes={user ? ["page-fade"] : undefined}
+          className="flex items-center gap-2"
+        >
           <PackageCheck className="size-8 shrink-0" aria-hidden="true" />
           <span className="text-lg font-semibold italic">{tApp("title")}</span>
         </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type ReactNode, type Ref } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronUp } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -43,8 +43,45 @@ function inspectionErrorMessage(
 /**
  * Two inspection steps. One can be expanded while the other stays docked.
  * Step 2 stays locked until a prediction is rendered into it.
+ * Navigating away drops the in-progress photo and step, so the next visit asks for a new upload.
  */
 export function InspectionSteps({ batchId }: InspectionStepsProps) {
+  const [sessionKey, setSessionKey] = useState(0);
+  const resetOnce = useRef(false);
+
+  // Activity hides this page instead of unmounting it. Drop the attempt when it hides.
+  useLayoutEffect(() => {
+    return () => {
+      if (resetOnce.current) {
+        return;
+      }
+      resetOnce.current = true;
+      setSessionKey((key) => key + 1);
+    };
+  }, []);
+
+  useEffect(() => {
+    resetOnce.current = false;
+  }, [sessionKey]);
+
+  useEffect(() => {
+    function onPageShow(event: PageTransitionEvent) {
+      if (!event.persisted) {
+        return;
+      }
+      setSessionKey((key) => key + 1);
+    }
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
+  return <InspectionSession key={sessionKey} batchId={batchId} />;
+}
+
+/**
+ * One inspection attempt. Remounting it clears the photo, prediction, and open step.
+ */
+function InspectionSession({ batchId }: InspectionStepsProps) {
   const t = useTranslations("Inspection");
   const tDefect = useTranslations("DefectType");
   const tErrors = useTranslations("Errors");

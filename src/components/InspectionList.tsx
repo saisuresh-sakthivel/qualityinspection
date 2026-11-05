@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { InspectionListItem } from "@/types/models";
 
@@ -24,7 +25,11 @@ export async function InspectionList({ inspections, filtered }: InspectionListPr
           key={inspection.id}
           className="flex items-center gap-4 rounded-lg border border-border bg-muted p-4"
         >
-          <img
+          {/* The photo route checks the session cookie. The optimizer fetches without it. */}
+          <Image
+            unoptimized
+            width={72}
+            height={72}
             className="size-[4.5rem] rounded-md border border-border bg-surface object-cover"
             src={`/api/inspections/${inspection.id}/image`}
             alt={t("thumbnailAlt", { batch: inspection.batchId })}

@@ -8,6 +8,7 @@ import {
   type DragEvent,
   type ReactNode,
 } from "react";
+import Image from "next/image";
 import { ChevronDown, CloudUpload, FilePlus, X } from "lucide-react";
 import { StyledButton } from "@/components/StyledButton";
 import type { FormActionConfig, FormFieldSchema } from "@/types/form";
@@ -302,11 +303,14 @@ function FileDropzone({
       />
       {preview ? (
         <div className="relative inline-block">
-          {/* A local object URL cannot be served by the image optimizer. */}
-          <img
+          {/* Blob URLs skip the optimizer. Width and height only reserve space before the file loads. */}
+          <Image
             src={preview.url}
             alt={preview.name}
+            width={144}
+            height={144}
             className="h-36 w-auto max-w-full rounded-md border border-border object-contain"
+            style={{ width: "auto" }}
           />
           <button
             type="button"

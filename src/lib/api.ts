@@ -1,7 +1,43 @@
 import { NextResponse } from "next/server";
-import { VisionProviderError } from "@/domain/errors";
-import { AuthError } from "@/lib/auth";
 import { ZodError } from "zod";
+import { VisionProviderError } from "@/domain/errors";
+import { AuthError, getCurrentUser, requireRole } from "@/lib/auth";
+import type { SessionUser, UserRole } from "@/types/models";
+
+/**
+ * What the route is allowed to do.
+ * Reads allow either signed-in role.
+ * Writes and the analyze call allow only a Quality Engineer.
+ */
+export type AppApiAccess = "read" | "write" | "analyze";
+
+type AppApiHandler<C> = (user: SessionUser, request: Request, context: C) => Promise<NextResponse>;
+
+/**
+ * Session and role gate for route handlers.
+ * `write` and `analyze` always require a Quality Engineer, so a Production
+ * Supervisor cannot classify a photo or persist a batch or inspection.
+ * `read` allows either role unless `role` narrows that route further.
+ */
+export function makeAppApiCall<C = { params: Promise<Record<string, string>> }>(
+  access: AppApiAccess,
+  handler: AppApiHandler<C>,
+  role?: UserRole,
+): (request: Request, context: C) => Promise<NextResponse> {
+  const requiredRole: UserRole | undefined = access === "read" ? role : "QUALITY_ENGINEER";
+
+  return async (request, context) => {
+    try {
+      const user = requiredRole ? await requireRole(requiredRole) : await getCurrentUser();
+      if (!user) {
+        return errorResponse(401, "UNAUTHORIZED");
+      }
+      return await handler(user, request, context);
+    } catch (error) {
+      return toErrorResponse(error);
+    }
+  };
+}
 
 /**
  * JSON error body used by route handlers. The UI maps `code` through next-intl.

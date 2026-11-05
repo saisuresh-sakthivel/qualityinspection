@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { listInspections } from "@/app/api/inspections/route";
 import { DashboardTables } from "@/components/DashboardTables";
 import { PageShell } from "@/components/PageShell";
+import { PageTransition } from "@/components/PageTransition";
 import { computeInspectionKpis } from "@/domain/kpis";
 
 /**
@@ -13,15 +14,17 @@ export default async function DashboardPage() {
   const t = await getTranslations("Dashboard");
 
   return (
-    <Suspense
-      fallback={
-        <PageShell title={t("heading")} description={t("description")}>
-          <p>{t("loading")}</p>
-        </PageShell>
-      }
-    >
-      <DashboardResults />
-    </Suspense>
+    <PageTransition>
+      <Suspense
+        fallback={
+          <PageShell title={t("heading")} description={t("description")}>
+            <p>{t("loading")}</p>
+          </PageShell>
+        }
+      >
+        <DashboardResults />
+      </Suspense>
+    </PageTransition>
   );
 }
 

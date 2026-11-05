@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { errorResponse } from "@/lib/api";
-import { getCurrentUser } from "@/lib/auth";
+import { errorResponse, makeAppApiCall } from "@/lib/api";
 import { getPrisma } from "@/lib/db";
 import { readStoredImage } from "@/lib/uploads";
 
@@ -10,14 +9,10 @@ interface ImageRouteProps {
 
 /**
  * Serves an inspection photo to a signed-in user. The file never leaves uploads/.
+ * Both roles may read it. The wrapper still requires a session.
  */
-export async function GET(_request: Request, { params }: ImageRouteProps): Promise<NextResponse> {
-  const user = await getCurrentUser();
-  if (!user) {
-    return errorResponse(401, "UNAUTHORIZED");
-  }
-
-  const { id } = await params;
+export const GET = makeAppApiCall<ImageRouteProps>("read", async (_user, _request, context) => {
+  const { id } = await context.params;
   const inspection = await getPrisma().inspection.findUnique({
     where: { id },
     select: { imagePath: true },
@@ -37,4 +32,4 @@ export async function GET(_request: Request, { params }: ImageRouteProps): Promi
       "Cache-Control": "private, max-age=3600",
     },
   });
-}
+});

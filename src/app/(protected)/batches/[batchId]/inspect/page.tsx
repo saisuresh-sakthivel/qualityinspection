@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { getBatch } from "@/app/api/batches/route";
 import { InspectionSteps } from "@/components/InspectionSteps";
 import { PageShell } from "@/components/PageShell";
+import { PageTransition } from "@/components/PageTransition";
 import { QualityEngineerOnly } from "@/components/QualityEngineerOnly";
 
 interface InspectPageProps {
@@ -17,15 +18,17 @@ export default async function InspectPage({ params }: InspectPageProps) {
   const t = await getTranslations("Inspection");
 
   return (
-    <Suspense
-      fallback={
-        <PageShell title={t("stepsTitle")}>
-          <p>{t("loading")}</p>
-        </PageShell>
-      }
-    >
-      <InspectGate params={params} />
-    </Suspense>
+    <PageTransition>
+      <Suspense
+        fallback={
+          <PageShell title={t("stepsTitle")}>
+            <p>{t("loading")}</p>
+          </PageShell>
+        }
+      >
+        <InspectGate params={params} />
+      </Suspense>
+    </PageTransition>
   );
 }
 

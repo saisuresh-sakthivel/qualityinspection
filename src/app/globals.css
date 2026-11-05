@@ -58,6 +58,42 @@
   color: var(--color-text-muted);
 }
 
+/* Page body fades between routes. The header is anchored. */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+::view-transition-old(.page-fade) {
+  animation: 160ms ease both page-fade-out;
+}
+
+::view-transition-new(.page-fade) {
+  animation: 220ms ease 100ms both page-fade-in;
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+}
+
 /* Clips a step body, then opens it after the prediction is already in the DOM. */
 .step-panel {
   display: grid;
@@ -72,5 +108,10 @@
 @media (prefers-reduced-motion: reduce) {
   .step-panel {
     transition: none;
+  }
+
+  ::view-transition-old(.page-fade),
+  ::view-transition-new(.page-fade) {
+    animation: none;
   }
 }

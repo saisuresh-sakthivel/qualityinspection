@@ -1,8 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { errorResponse, toErrorResponse } from "@/lib/api";
-import { requireRole } from "@/lib/auth";
+import { errorResponse, makeAppApiCall } from "@/lib/api";
 import { getPrisma } from "@/lib/db";
 import type { Batch } from "@/types/models";
 
@@ -40,14 +39,11 @@ function toBatch(batch: { id: string; productName: string; productionLine: strin
 /**
  * Lists batches. Quality Engineers only.
  */
-export async function GET(): Promise<NextResponse> {
-  try {
-    await requireRole("QUALITY_ENGINEER");
-    return NextResponse.json(await listBatches());
-  } catch (error) {
-    return toErrorResponse(error);
-  }
-}
+export const GET = makeAppApiCall(
+  "read",
+  async () => NextResponse.json(await listBatches()),
+  "QUALITY_ENGINEER",
+);
 
 const createBatchSchema = z.object({
   id: z
@@ -59,11 +55,10 @@ const createBatchSchema = z.object({
 });
 
 /**
- * Creates a batch. Quality Engineers only — supervisors receive 403.
+ * Creates a batch. The wrapper rejects Production Supervisors before the insert.
  */
-export async function POST(request: Request): Promise<NextResponse> {
+export const POST = makeAppApiCall("write", async (_user, request) => {
   try {
-    await requireRole("QUALITY_ENGINEER");
     const input = createBatchSchema.parse(await request.json());
     const batch = await getPrisma().batch.create({
       data: {
@@ -81,6 +76,6 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return errorResponse(409, "BATCH_EXISTS");
     }
-    return toErrorResponse(error);
+    throw error;
   }
-}
+});
