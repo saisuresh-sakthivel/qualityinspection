@@ -4,10 +4,12 @@ import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronUp, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Form } from "@/components/Form";
 import { Modal } from "@/components/Modal";
 import { DEFECT_TYPES, isDefectType } from "@/domain/defects";
 import { errorTranslationKey } from "@/domain/errors";
 import { ApiError, classifyInspection, saveInspection } from "@/lib/apiClient";
+import type { FormFieldSchema } from "@/types/form";
 import type { DefectType, VisionPrediction } from "@/types/models";
 
 interface InspectionStepsProps {
@@ -136,6 +138,28 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
     }
   }
 
+  const reviewSchema: FormFieldSchema[] = [
+    {
+      name: "category",
+      type: "select",
+      label: t("category"),
+      placeholder: t("chooseCategory"),
+      value: category,
+      error: sameCategory ? t("sameAsPrediction") : undefined,
+      options: DEFECT_TYPES.map((type) => ({
+        value: type,
+        label: tDefect(type),
+      })),
+    },
+    {
+      name: "comments",
+      type: "textarea",
+      label: t("comments"),
+      rows: 3,
+      value: comments,
+    },
+  ];
+
   return (
     <>
       <div className="accordion">
@@ -144,19 +168,22 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
           hint={uploadDone ? (file?.name ?? t("stepUpload")) : t("stepUploadHint")}
           state={uploadDone ? "done" : "open"}
         >
-          <div className="stack">
-            <label className="field">
-              <span>{t("image")}</span>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(event) => {
-                  setFile(event.target.files?.[0] ?? null);
-                  setError(null);
-                }}
-              />
-            </label>
-            {error ? <p className="error">{error}</p> : null}
+          <Form
+            className="stack"
+            error={error}
+            schema={[
+              {
+                name: "image",
+                type: "file",
+                label: t("image"),
+                accept: "image/jpeg,image/png,image/webp",
+              },
+            ]}
+            onChange={(_name, value) => {
+              setFile(value instanceof File ? value : null);
+              setError(null);
+            }}
+          >
             <div className="step-actions">
               <button
                 className="btn-primary with-icon"
@@ -168,7 +195,7 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
                 {pending ? t("analyzing") : t("analyze")}
               </button>
             </div>
-          </div>
+          </Form>
         </StepSection>
 
         <StepSection
@@ -187,39 +214,22 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
             ) : (
               <p className="error">{tErrors("predictionInvalid")}</p>
             )}
-            <label className="field">
-              <span>{t("category")}</span>
-              <select
-                value={category}
-                aria-invalid={sameCategory}
-                onChange={(event) => {
-                  const value = event.target.value;
+            <Form
+              className="stack"
+              schema={reviewSchema}
+              onChange={(name, value) => {
+                if (typeof value !== "string") {
+                  return;
+                }
+                if (name === "category") {
                   setCategory(isDefectType(value) ? value : "");
                   setSameCategory(false);
-                }}
-              >
-                <option value="">{t("chooseCategory")}</option>
-                {DEFECT_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {tDefect(type)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {sameCategory ? (
-              <p className="error" role="alert">
-                {t("sameAsPrediction")}
-              </p>
-            ) : null}
-            <label className="field">
-              <span>{t("comments")}</span>
-              <textarea
-                rows={3}
-                value={comments}
-                onChange={(event) => setComments(event.target.value)}
-              />
-            </label>
-            <div className="step-actions">
+                  return;
+                }
+                setComments(value);
+              }}
+            >
+              <div className="step-actions">
               <button
                 className="btn-secondary"
                 type="button"
@@ -237,6 +247,7 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
                 {t("deny")}
               </button>
             </div>
+            </Form>
           </div>
         </StepSection>
       </div>

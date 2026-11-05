@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { LogOut } from "lucide-react";
 import { AppNav } from "@/components/AppNav";
 import { logout } from "@/app/login/actions";
 import { getCurrentUser } from "@/lib/auth";
@@ -24,8 +25,9 @@ export async function AppHeader() {
   return (
     <header className="app-header">
       <div className="app-brand">
-        <Link href={user ? "/batches" : "/login"} className="app-brand-title">
-          {tApp("title")}
+        <Link href={user ? "/batches" : "/login"} className="app-brand-lockup">
+          <img className="app-logo" src="/logo.png" alt="" />
+          <span className="app-brand-title">{tApp("title")}</span>
         </Link>
         {user ? <p className="app-brand-role">{tRole(user.role)}</p> : null}
       </div>
@@ -38,8 +40,8 @@ export async function AppHeader() {
         <div className="app-header-actions">
           <span className="app-header-name">{givenName(user.name)}</span>
           <form action={logout}>
-            <button className="btn-secondary" type="submit">
-              {t("logout")}
+            <button className="app-logout" type="submit" aria-label={t("logout")}>
+              <LogOut aria-hidden="true" />
             </button>
           </form>
         </div>

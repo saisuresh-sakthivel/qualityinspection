@@ -34,6 +34,7 @@
     "details": "Batch details",
     "id": "Batch ID",
     "idHint": "Example: BATCH-003",
+    "idPlaceholder": "BATCH-003",
     "productName": "Product name",
     "productionLine": "Production line",
     "create": "Create batch",

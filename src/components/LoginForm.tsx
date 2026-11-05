@@ -2,37 +2,29 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
+import { Form } from "@/components/Form";
 import { login, type LoginState } from "@/app/login/actions";
+import type { FormFieldSchema } from "@/types/form";
 
 const initialState: LoginState = { error: null };
 
 /**
- * Username and password form for the two seeded demo users.
+ * Loads the shared form with the login schema from the login screen.
  */
-export function LoginForm() {
+export function LoginForm({ schema }: { schema: FormFieldSchema[] }) {
   const t = useTranslations("Auth");
   const [state, action, pending] = useActionState(login, initialState);
 
   return (
-    <form action={action} className="stack">
-      <label className="field">
-        <span>{t("username")}</span>
-        <input name="username" autoComplete="username" required />
-      </label>
-      <label className="field">
-        <span>{t("password")}</span>
-        <input
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-        />
-      </label>
-      {state.error ? <p className="error">{t("invalid")}</p> : null}
-      <button className="btn-primary" type="submit" disabled={pending}>
-        {t("submit")}
-      </button>
+    <Form
+      schema={schema}
+      action={action}
+      submitLabel={t("submit")}
+      pending={pending}
+      error={state.error ? t("invalid") : null}
+      className="stack"
+    >
       <p className="hint">{t("hint")}</p>
-    </form>
+    </Form>
   );
 }
