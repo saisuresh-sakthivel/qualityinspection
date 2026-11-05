@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { LogOut, PackageCheck } from "lucide-react";
 import { AppNav } from "@/components/AppNav";
 import { logout } from "@/app/login/actions";
 import { getCurrentUser } from "@/lib/auth";
@@ -26,7 +26,7 @@ export async function AppHeader() {
     <header className="app-header">
       <div className="app-brand">
         <Link href={user ? "/batches" : "/login"} className="app-brand-lockup">
-          <img className="app-logo" src="/logo.png" alt="" />
+          <PackageCheck className="app-logo" aria-hidden="true" />
           <span className="app-brand-title">{tApp("title")}</span>
         </Link>
         {user ? <p className="app-brand-role">{tRole(user.role)}</p> : null}
