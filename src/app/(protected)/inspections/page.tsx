@@ -15,9 +15,7 @@ interface InspectionsPageProps {
  * Lists logged inspections for both roles. Logging starts from a batch.
  * The query string and the list are request data, so they stream in.
  */
-export default async function InspectionsPage({
-  searchParams,
-}: InspectionsPageProps) {
+export default async function InspectionsPage({ searchParams }: InspectionsPageProps) {
   const t = await getTranslations("Inspection");
 
   return (
@@ -39,8 +37,7 @@ export default async function InspectionsPage({
 async function InspectionResults({ searchParams }: InspectionsPageProps) {
   const t = await getTranslations("Inspection");
   const { defect } = await searchParams;
-  const selected: DefectType | undefined =
-    defect && isDefectType(defect) ? defect : undefined;
+  const selected: DefectType | undefined = defect && isDefectType(defect) ? defect : undefined;
   const inspections = await listInspections(selected);
 
   return (

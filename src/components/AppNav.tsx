@@ -18,7 +18,7 @@ export function AppNav() {
   ];
 
   return (
-    <nav className="app-nav" aria-label={tApp("title")}>
+    <nav className="flex items-center gap-2" aria-label={tApp("title")}>
       {items.map((item) => {
         const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
@@ -26,6 +26,7 @@ export function AppNav() {
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
+            className="rounded-md px-3 py-1.5 text-base text-foreground no-underline hover:bg-accent hover:text-black aria-[current=page]:bg-accent aria-[current=page]:text-black"
           >
             {item.label}
           </Link>

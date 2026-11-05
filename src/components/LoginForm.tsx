@@ -17,14 +17,14 @@ export function LoginForm({ schema }: { schema: FormFieldSchema[] }) {
 
   return (
     <Form
+      title={t("loginHeading")}
       schema={schema}
       action={action}
       submitLabel={t("submit")}
       pending={pending}
       error={state.error ? t("invalid") : null}
-      className="stack"
-    >
-      <p className="hint">{t("hint")}</p>
-    </Form>
+      className="mt-2.5 flex w-full max-w-xl flex-col items-center gap-4 text-center"
+      submitClassName="w-full text-base"
+    />
   );
 }

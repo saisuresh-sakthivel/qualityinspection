@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { LoginBrand } from "@/components/LoginBrand";
 import { LoginForm } from "@/components/LoginForm";
 import type { FormFieldSchema } from "@/types/form";
 
@@ -27,9 +26,8 @@ export default async function LoginPage() {
   ];
 
   return (
-    <div className="login-screen">
-      <LoginBrand title={t("screenTitle")} />
-      <main className="login-panel">
+    <div className="flex flex-1 flex-col text-black">
+      <main className="flex flex-1 items-start justify-center px-4 pb-8">
         <LoginForm schema={schema} />
       </main>
     </div>

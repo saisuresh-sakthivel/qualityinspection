@@ -4,10 +4,7 @@ import { classifyUnitImage } from "@/ai/openai";
 import { errorResponse, toErrorResponse } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
 import { getPrisma } from "@/lib/db";
-import {
-  extensionForMime,
-  storePendingClassification,
-} from "@/lib/uploads";
+import { extensionForMime, storePendingClassification } from "@/lib/uploads";
 
 export const maxDuration = 30;
 

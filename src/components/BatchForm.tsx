@@ -69,7 +69,7 @@ export function BatchForm() {
       submitLabel={t("create")}
       pending={pending}
       error={error}
-      className="stack card"
+      className="flex max-w-xl flex-col gap-4 rounded-lg border border-border bg-muted p-4"
     />
   );
 }

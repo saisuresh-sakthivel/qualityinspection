@@ -15,9 +15,13 @@ export async function DefectFilter({ selected }: DefectFilterProps) {
   const tDefect = await getTranslations("DefectType");
 
   return (
-    <nav className="filter-row" aria-label={t("filterLabel")}>
+    <nav className="mb-4 flex flex-wrap items-center gap-2" aria-label={t("filterLabel")}>
       <span className="text-sm">{t("filterLabel")}</span>
-      <Link href="/inspections" aria-current={selected ? undefined : "page"}>
+      <Link
+        href="/inspections"
+        aria-current={selected ? undefined : "page"}
+        className="rounded-md border border-border bg-surface px-2.5 py-1 text-sm text-black no-underline hover:bg-accent aria-[current=page]:bg-accent"
+      >
         {t("filterAll")}
       </Link>
       {DEFECT_TYPES.map((type) => (
@@ -25,6 +29,7 @@ export async function DefectFilter({ selected }: DefectFilterProps) {
           key={type}
           href={`/inspections?defect=${encodeURIComponent(type)}`}
           aria-current={selected === type ? "page" : undefined}
+          className="rounded-md border border-border bg-surface px-2.5 py-1 text-sm text-black no-underline hover:bg-accent aria-[current=page]:bg-accent"
         >
           {tDefect(type)}
         </Link>

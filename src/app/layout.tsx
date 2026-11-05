@@ -24,15 +24,13 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Root App Router layout: intl provider + shared header.
  */
-export default async function RootLayout({
-  children,
-}: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   const messages = await getMessages();
 
   return (
     <html lang={locale} className="h-full antialiased">
-      <body className="flex min-h-full flex-col bg-background text-foreground">
+      <body className="flex min-h-full flex-col bg-background font-sans text-base text-foreground">
         <NextIntlClientProvider messages={messages}>
           <Suspense fallback={null}>
             <AppHeader />

@@ -19,10 +19,7 @@ function emptyBreakdown(): Record<DefectType, number> {
  * Defect rate = rejected / total. AI acceptance = non-overridden / total.
  */
 export function computeInspectionKpis(
-  inspections: Pick<
-    Inspection,
-    "finalDefectType" | "wasOverridden"
-  >[],
+  inspections: Pick<Inspection, "finalDefectType" | "wasOverridden">[],
 ): InspectionKpis {
   const total = inspections.length;
   const breakdown = emptyBreakdown();

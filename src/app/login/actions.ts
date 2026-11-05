@@ -12,10 +12,7 @@ export interface LoginState {
 /**
  * Checks seeded credentials and starts a session. Wrong passwords stay on the form.
  */
-export async function login(
-  _previous: LoginState,
-  formData: FormData,
-): Promise<LoginState> {
+export async function login(_previous: LoginState, formData: FormData): Promise<LoginState> {
   const username = String(formData.get("username") ?? "")
     .trim()
     .toLowerCase();

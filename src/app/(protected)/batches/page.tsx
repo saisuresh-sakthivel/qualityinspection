@@ -37,7 +37,7 @@ async function BatchList() {
 
   return (
     <PageShell title={t("heading")} description={t("description")}>
-      <div className="stack">
+      <div className="flex max-w-xl flex-col gap-4">
         <BatchBrowser batches={batches} canLog={canLog} />
         {canLog ? <BatchForm /> : null}
       </div>

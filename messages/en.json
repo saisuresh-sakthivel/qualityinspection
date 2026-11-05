@@ -17,13 +17,11 @@
     "PRODUCTION_SUPERVISOR": "Production Supervisor"
   },
   "Auth": {
-    "screenTitle": "Quality Inspection: AI-Assisted Defect Classification",
-    "loginHeading": "Log in",
+    "loginHeading": "Log In",
     "loginDescription": "Use a seeded demo account. Access depends on the role stored for that user.",
     "username": "Username",
     "password": "Password",
     "submit": "Log in",
-    "hint": "Quality Engineer: priya / engineer. Production Supervisor: alex / supervisor.",
     "invalid": "Username or password is incorrect.",
     "forbiddenHeading": "Not allowed",
     "forbidden": "A Production Supervisor can view batches, inspections, and the dashboard, but cannot create batches or log inspections."

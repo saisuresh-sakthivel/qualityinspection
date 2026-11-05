@@ -5,12 +5,16 @@ import type { FormFieldSchema } from "@/types/form";
 
 interface FormProps {
   schema: FormFieldSchema[];
+  /** Shown above the fields when a screen names the form. */
+  title?: string;
   /** Native submit. Omitted when the screen handles actions itself. */
   action?: (formData: FormData) => void | Promise<void>;
   submitLabel?: string;
   pending?: boolean;
   error?: string | null;
   className?: string;
+  /** Extra utilities for the submit control, such as a full-width login button. */
+  submitClassName?: string;
   children?: ReactNode;
   /** Fired for controlled fields and file inputs. */
   onChange?: (name: string, value: string | File | null) => void;
@@ -21,22 +25,29 @@ interface FormProps {
  */
 export function Form({
   schema,
+  title,
   action,
   submitLabel,
   pending = false,
   error,
   className,
+  submitClassName,
   children,
   onChange,
 }: FormProps) {
   const body = (
     <>
+      {title ? <h2 className="m-0 text-xl font-semibold">{title}</h2> : null}
       {schema.map((field) => (
         <FormField key={field.name} field={field} onChange={onChange} />
       ))}
-      {error ? <p className="error">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
       {submitLabel ? (
-        <button className="btn-primary" type="submit" disabled={pending}>
+        <button
+          className={`inline-block cursor-pointer rounded-md border border-primary bg-primary px-4 py-2 font-sans text-on-primary hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.55] ${submitClassName ?? "text-sm"}`}
+          type="submit"
+          disabled={pending}
+        >
           {submitLabel}
         </button>
       ) : null}
@@ -69,18 +80,21 @@ function FormField({
   const invalid = Boolean(field.error);
 
   return (
-    <label className="field">
-      <span className="field-label">{field.label}</span>
+    <label className="flex w-full flex-col gap-1.5">
+      <span className="text-left text-base font-bold">{field.label}</span>
       {renderControl(field, required, invalid, onChange)}
-      {field.hint ? <span className="hint">{field.hint}</span> : null}
+      {field.hint ? <span className="text-sm">{field.hint}</span> : null}
       {field.error ? (
-        <p className="error" role="alert">
+        <p className="text-sm text-danger" role="alert">
           {field.error}
         </p>
       ) : null}
     </label>
   );
 }
+
+const controlClass =
+  "rounded-md border border-border bg-surface px-3 py-2 font-sans text-base text-foreground";
 
 /**
  * Text and password stay native inputs so a form action can read FormData.
@@ -95,6 +109,7 @@ function renderControl(
   if (field.type === "textarea") {
     return (
       <textarea
+        className={controlClass}
         name={field.name}
         rows={field.rows ?? 3}
         required={required}
@@ -107,6 +122,7 @@ function renderControl(
   if (field.type === "select") {
     return (
       <select
+        className={controlClass}
         name={field.name}
         required={required}
         aria-invalid={invalid || undefined}
@@ -125,6 +141,7 @@ function renderControl(
   if (field.type === "file") {
     return (
       <input
+        className={controlClass}
         name={field.name}
         type="file"
         accept={field.accept}
@@ -138,6 +155,7 @@ function renderControl(
 
   return (
     <input
+      className={controlClass}
       name={field.name}
       type={field.type === "password" ? "password" : "text"}
       placeholder={field.placeholder}
@@ -161,9 +179,7 @@ function controlledValue(
   }
   return {
     value: field.value,
-    onChange: (
-      event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-    ) => {
+    onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       onChange?.(field.name, event.currentTarget.value);
     },
   };

@@ -18,46 +18,59 @@ export async function DashboardTables({ kpis }: DashboardTablesProps) {
     [t("passed"), String(kpis.passed)],
     [t("rejected"), String(kpis.rejected)],
     [t("defectRate"), t("percent", { value: Math.round(kpis.defectRate * 100) })],
-    [
-      t("aiAcceptanceRate"),
-      t("percent", { value: Math.round(kpis.aiAcceptanceRate * 100) }),
-    ],
+    [t("aiAcceptanceRate"), t("percent", { value: Math.round(kpis.aiAcceptanceRate * 100) })],
   ] as const;
 
   return (
-    <div className="dashboard-tables">
-      <div className="data-table-wrap">
-        <table className="data-table">
+    <div className="flex flex-col gap-6">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+        <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th scope="col">{t("kpi")}</th>
-              <th scope="col">{t("value")}</th>
+              <th className="bg-accent px-4 py-3.5 text-left text-sm font-semibold" scope="col">
+                {t("kpi")}
+              </th>
+              <th className="bg-accent px-4 py-3.5 text-left text-sm font-semibold" scope="col">
+                {t("value")}
+              </th>
             </tr>
           </thead>
           <tbody>
             {kpiRows.map(([label, value]) => (
               <tr key={label}>
-                <td>{label}</td>
-                <td>{value}</td>
+                <td className="border-b border-border px-4 py-3.5 text-left text-base [tr:last-child_&]:border-b-0">
+                  {label}
+                </td>
+                <td className="border-b border-border px-4 py-3.5 text-left text-base [tr:last-child_&]:border-b-0">
+                  {value}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="data-table-wrap">
-        <table className="data-table">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+        <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th scope="col">{t("defectType")}</th>
-              <th scope="col">{t("count")}</th>
+              <th className="bg-accent px-4 py-3.5 text-left text-sm font-semibold" scope="col">
+                {t("defectType")}
+              </th>
+              <th className="bg-accent px-4 py-3.5 text-left text-sm font-semibold" scope="col">
+                {t("count")}
+              </th>
             </tr>
           </thead>
           <tbody>
             {DEFECT_TYPES.map((type) => (
               <tr key={type}>
-                <td>{tDefect(type)}</td>
-                <td>{kpis.defectBreakdown[type]}</td>
+                <td className="border-b border-border px-4 py-3.5 text-left text-base [tr:last-child_&]:border-b-0">
+                  {tDefect(type)}
+                </td>
+                <td className="border-b border-border px-4 py-3.5 text-left text-base [tr:last-child_&]:border-b-0">
+                  {kpis.defectBreakdown[type]}
+                </td>
               </tr>
             ))}
           </tbody>

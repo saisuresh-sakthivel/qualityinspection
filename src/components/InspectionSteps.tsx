@@ -162,14 +162,14 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
 
   return (
     <>
-      <div className="accordion">
+      <div className="flex max-w-2xl flex-col overflow-hidden rounded-lg border border-border bg-surface">
         <StepSection
           title={t("stepUpload")}
           hint={uploadDone ? (file?.name ?? t("stepUpload")) : t("stepUploadHint")}
           state={uploadDone ? "done" : "open"}
         >
           <Form
-            className="stack"
+            className="flex max-w-xl flex-col gap-4"
             error={error}
             schema={[
               {
@@ -184,14 +184,14 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
               setError(null);
             }}
           >
-            <div className="step-actions">
+            <div className="flex flex-wrap justify-start gap-3">
               <button
-                className="btn-primary with-icon"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-primary bg-primary px-4 py-2 font-sans text-sm text-on-primary hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.55]"
                 type="button"
                 disabled={pending || !file}
                 onClick={analyze}
               >
-                {pending ? <Loader2 className="spin" aria-hidden="true" /> : null}
+                {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
                 {pending ? t("analyzing") : t("analyze")}
               </button>
             </div>
@@ -203,7 +203,7 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
           hint={uploadDone ? t("stepPredictionHint") : t("stepPredictionLocked")}
           state={uploadDone ? "open" : "locked"}
         >
-          <div className="stack">
+          <div className="flex max-w-xl flex-col gap-4">
             {predicted && review?.prediction ? (
               <p>
                 {tDefect(predicted)}
@@ -212,10 +212,10 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
                 })}`}
               </p>
             ) : (
-              <p className="error">{tErrors("predictionInvalid")}</p>
+              <p className="text-sm text-danger">{tErrors("predictionInvalid")}</p>
             )}
             <Form
-              className="stack"
+              className="flex max-w-xl flex-col gap-4"
               schema={reviewSchema}
               onChange={(name, value) => {
                 if (typeof value !== "string") {
@@ -229,24 +229,24 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
                 setComments(value);
               }}
             >
-              <div className="step-actions">
-              <button
-                className="btn-secondary"
-                type="button"
-                disabled={!predicted || pending}
-                onClick={() => choose("allow")}
-              >
-                {t("allow")}
-              </button>
-              <button
-                className="btn-secondary"
-                type="button"
-                disabled={!isDefectType(category) || pending}
-                onClick={() => choose("deny")}
-              >
-                {t("deny")}
-              </button>
-            </div>
+              <div className="flex flex-wrap justify-start gap-3">
+                <button
+                  className="inline-block cursor-pointer rounded-md border border-border bg-surface px-4 py-2 font-sans text-sm text-black hover:bg-accent disabled:cursor-not-allowed disabled:opacity-[0.55]"
+                  type="button"
+                  disabled={!predicted || pending}
+                  onClick={() => choose("allow")}
+                >
+                  {t("allow")}
+                </button>
+                <button
+                  className="inline-block cursor-pointer rounded-md border border-border bg-surface px-4 py-2 font-sans text-sm text-black hover:bg-accent disabled:cursor-not-allowed disabled:opacity-[0.55]"
+                  type="button"
+                  disabled={!isDefectType(category) || pending}
+                  onClick={() => choose("deny")}
+                >
+                  {t("deny")}
+                </button>
+              </div>
             </Form>
           </div>
         </StepSection>
@@ -267,9 +267,9 @@ export function InspectionSteps({ batchId }: InspectionStepsProps) {
           submitLabel={t("confirmYes")}
           submitDisabled={pending}
         >
-          <div className="stack">
+          <div className="flex max-w-xl flex-col gap-4">
             <p>{t("confirmBody", { category: tDefect(finalType) })}</p>
-            {error ? <p className="error">{error}</p> : null}
+            {error ? <p className="text-sm text-danger">{error}</p> : null}
           </div>
         </Modal>
       ) : null}
@@ -294,15 +294,23 @@ function StepSection({
   const Icon = state === "open" ? ChevronUp : ChevronRight;
 
   return (
-    <section className="accordion-step" data-state={state} aria-disabled={state === "locked"}>
-      <div className="accordion-heading">
+    <section
+      className="border-t border-border px-6 py-5 first:border-t-0 data-[state=locked]:bg-muted"
+      data-state={state}
+      aria-disabled={state === "locked"}
+    >
+      <div className="flex items-start justify-between gap-4">
         <div>
-          {state === "open" ? <h2>{title}</h2> : <p className="accordion-title">{title}</p>}
+          {state === "open" ? (
+            <h2 className="m-0 text-xl font-semibold">{title}</h2>
+          ) : (
+            <p className="m-0 text-lg font-semibold text-foreground">{title}</p>
+          )}
           <p className="text-sm">{hint}</p>
         </div>
         <Icon aria-hidden="true" />
       </div>
-      {state === "open" ? <div className="accordion-body">{children}</div> : null}
+      {state === "open" ? <div className="mt-4">{children}</div> : null}
     </section>
   );
 }

@@ -35,11 +35,7 @@ export function isDefectType(value: string): value is DefectType {
  * Unknown labels return null so the caller can retry or force a human pick.
  */
 export function normalizeDefectLabel(raw: string): DefectType | null {
-  const key = raw
-    .trim()
-    .toLowerCase()
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ");
+  const key = raw.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
   if (isDefectType(raw.trim())) {
     return raw.trim() as DefectType;
   }
@@ -50,10 +46,7 @@ export function normalizeDefectLabel(raw: string): DefectType | null {
  * Derives whether the human final label differs from the AI prediction.
  * A null AI prediction always counts as overridden once a final value exists.
  */
-export function wasOverridden(
-  aiPredicted: DefectType | null,
-  finalDefect: DefectType,
-): boolean {
+export function wasOverridden(aiPredicted: DefectType | null, finalDefect: DefectType): boolean {
   if (aiPredicted === null) {
     return true;
   }

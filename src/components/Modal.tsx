@@ -34,21 +34,22 @@ export function Modal({
 }: ModalProps) {
   return (
     <div
-      className="modal-backdrop"
-      data-layer={layer}
+      className={`fixed inset-0 flex items-center justify-center bg-overlay p-4 ${layer === 3 ? "z-40" : layer === 2 ? "z-30" : "z-20"}`}
       onClick={onClose}
     >
       <div
-        className="modal stack"
+        className="flex max-h-[90vh] w-full max-w-xl flex-col gap-4 overflow-auto rounded-lg border border-border bg-surface p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="modal-header">
-          <h2 id={titleId}>{title}</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 id={titleId} className="m-0 text-xl font-semibold">
+            {title}
+          </h2>
           <button
-            className="icon-button"
+            className="inline-flex cursor-pointer border-0 bg-transparent p-1 text-black hover:bg-accent"
             type="button"
             onClick={onClose}
             aria-label={closeLabel}
@@ -57,10 +58,10 @@ export function Modal({
           </button>
         </div>
         <div>{children}</div>
-        <div className="modal-footer">
+        <div className="flex items-center justify-end gap-3">
           {onSubmit ? (
             <button
-              className="btn-primary"
+              className="inline-block cursor-pointer rounded-md border border-primary bg-primary px-4 py-2 font-sans text-sm text-on-primary hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.55]"
               type="button"
               onClick={onSubmit}
               disabled={submitDisabled}
@@ -68,7 +69,11 @@ export function Modal({
               {submitLabel}
             </button>
           ) : null}
-          <button className="btn-secondary" type="button" onClick={onClose}>
+          <button
+            className="inline-block cursor-pointer rounded-md border border-border bg-surface px-4 py-2 font-sans text-sm text-black hover:bg-accent"
+            type="button"
+            onClick={onClose}
+          >
             {closeLabel}
           </button>
         </div>

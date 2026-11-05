@@ -29,11 +29,7 @@ export async function getBatch(id: string): Promise<Batch | null> {
 /**
  * Keeps the public batch shape free of Prisma fields.
  */
-function toBatch(batch: {
-  id: string;
-  productName: string;
-  productionLine: string;
-}): Batch {
+function toBatch(batch: { id: string; productName: string; productionLine: string }): Batch {
   return {
     id: batch.id,
     productName: batch.productName,
@@ -82,10 +78,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       productionLine: batch.productionLine,
     });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return errorResponse(409, "BATCH_EXISTS");
     }
     return toErrorResponse(error);

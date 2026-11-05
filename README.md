@@ -30,12 +30,12 @@ docker compose up -d
 
 This starts Postgres 16 on `localhost:5432` with:
 
-| Setting  | Value              |
-|----------|--------------------|
-| User     | `qi`               |
-| Password | `qi`               |
-| Database | `qualityinspection`|
-| Host port| `5432`             |
+| Setting   | Value               |
+| --------- | ------------------- |
+| User      | `qi`                |
+| Password  | `qi`                |
+| Database  | `qualityinspection` |
+| Host port | `5432`              |
 
 Stop it later with `docker compose down`. Data persists in the `qi_pg_data` volume unless you add `-v`.
 
@@ -73,9 +73,9 @@ npm run db:seed
 
 Seed creates:
 
-| Kind | Data |
-|------|------|
-| Users | `priya` / `engineer` — Priya Singh, Quality Engineer. `alex` / `supervisor` — Alex Chen, Production Supervisor. |
+| Kind    | Data                                                                                                                 |
+| ------- | -------------------------------------------------------------------------------------------------------------------- |
+| Users   | `priya` / `engineer` — Priya Singh, Quality Engineer. `alex` / `supervisor` — Alex Chen, Production Supervisor.      |
 | Batches | `BATCH-001` Steel Bracket — Model X200 / Line 3 (from the brief). `BATCH-002` Aluminum Housing — Model H50 / Line 1. |
 
 Re-running `npm run db:seed` upserts the same rows.
@@ -88,17 +88,42 @@ Open [http://localhost:3000/login](http://localhost:3000/login).
 - Production Supervisor can open the inspection list and dashboard only.
 - Those restrictions are enforced on `POST /api/batches`, `POST /api/inspections/classify`, and `POST /api/inspections` (403), not only in the UI.
 
-Set `AUTH_SECRET` in `.env` before logging in. Set `GEMINI_API_KEY` before analyzing a photo. The vision model is Gemini `gemini-flash-latest`, called with the `X-goog-api-key` header.
+Set `AUTH_SECRET` in `.env` before logging in. The live classifier is OpenAI `gpt-5.6-terra` (`OPENAI_API_KEY`). Switch to Gemini `gemini-flash-latest` by importing `classifyUnitImage` from `src/ai/gemini.ts` instead of `src/ai/openai.ts`. Model replies are parsed with Zod and kept only when the label is one of Scratch, Dent, Paint Issue, Missing Component, or No Defect.
 
-## Still to build
+A Quality Engineer accepts that label or denies it with a different category. The save route copies the AI fields from the stored classification and sets `was_overridden` when the final label differs. Those columns are not taken from the browser.
 
-Inspection list filters, KPI dashboard, Vitest, and the pre-commit hook.
+## Quality checks
+
+`npm install` runs `prepare`, which points Git at `.husky`. Every `git commit` then runs, in order:
+
+1. Prettier and ESLint (`eslint` 10 with `eslint-config-next` 16) on the staged files
+2. `npm test` — Vitest for the taxonomy, override flag, vision parse, and KPI rates
+3. `npm run lint` — ESLint on the project
+4. `npm run audit` — `npm audit --audit-level=high`
+
+A failing step aborts the commit.
+
+Confirm the hook is installed:
+
+```bash
+git config core.hooksPath   # .husky/_
+test -x .husky/pre-commit && echo "pre-commit is active"
+```
+
+Run the same checks without committing:
+
+```bash
+npm test
+npm run lint
+npm run format:check
+npm run audit
+```
 
 ## Stack
 
 - Next.js 16 App Router, React 19, TypeScript
 - Tailwind CSS + tokens in `src/app/globals.css` (white / light blue)
 - `next-intl` + `messages/en.json` for all UI strings
-- Prisma + PostgreSQL (schema only in this draft)
+- Prisma + PostgreSQL
 
 See `AGENTS.md` for coding guardrails.

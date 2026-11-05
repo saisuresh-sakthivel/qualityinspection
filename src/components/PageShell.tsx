@@ -13,7 +13,7 @@ export function PageShell({ title, description, children }: PageShellProps) {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
       <div className="mb-6">
-        <h1>{title}</h1>
+        <h1 className="text-hero font-semibold">{title}</h1>
         {description ? <p className="mt-2 max-w-2xl">{description}</p> : null}
       </div>
       {children}

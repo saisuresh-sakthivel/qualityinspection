@@ -10,9 +10,7 @@ import type { DefectType, InspectionListItem } from "@/types/models";
 /**
  * Loads inspections for the list. Optional defect filter uses the final type.
  */
-export async function listInspections(
-  defect?: DefectType,
-): Promise<InspectionListItem[]> {
+export async function listInspections(defect?: DefectType): Promise<InspectionListItem[]> {
   const inspections = await getPrisma().inspection.findMany({
     where: defect ? { finalDefectType: defect } : undefined,
     include: { inspector: { select: { name: true } } },
@@ -92,10 +90,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         aiPredictedDefectType: pending.aiPredictedDefectType,
         aiConfidence: pending.aiConfidence,
         finalDefectType: input.finalDefectType,
-        wasOverridden: wasOverridden(
-          pending.aiPredictedDefectType,
-          input.finalDefectType,
-        ),
+        wasOverridden: wasOverridden(pending.aiPredictedDefectType, input.finalDefectType),
         comments,
         inspectorId: user.id,
       },

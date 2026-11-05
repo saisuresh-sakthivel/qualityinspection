@@ -51,9 +51,7 @@ async function InspectBatch({ batchId }: { batchId: string }) {
 
   if (!batch) {
     const errors = await getTranslations("Errors");
-    return (
-      <PageShell title={t("stepsTitle")} description={errors("batchNotFound")} />
-    );
+    return <PageShell title={t("stepsTitle")} description={errors("batchNotFound")} />;
   }
 
   return (

@@ -11,10 +11,7 @@ interface ImageRouteProps {
 /**
  * Serves an inspection photo to a signed-in user. The file never leaves uploads/.
  */
-export async function GET(
-  _request: Request,
-  { params }: ImageRouteProps,
-): Promise<NextResponse> {
+export async function GET(_request: Request, { params }: ImageRouteProps): Promise<NextResponse> {
   const user = await getCurrentUser();
   if (!user) {
     return errorResponse(401, "UNAUTHORIZED");

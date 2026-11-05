@@ -27,9 +27,7 @@ export function parseVisionPrediction(text: string): VisionPrediction | null {
       return null;
     }
 
-    const predictedDefectType = normalizeDefectLabel(
-      parsed.data.predicted_defect_type,
-    );
+    const predictedDefectType = normalizeDefectLabel(parsed.data.predicted_defect_type);
     if (!predictedDefectType) {
       return null;
     }

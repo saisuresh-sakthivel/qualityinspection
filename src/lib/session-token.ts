@@ -52,17 +52,12 @@ export function readSessionUserId(token: string): string | null {
   const expected = sign(body);
   const actualBuf = Buffer.from(signature);
   const expectedBuf = Buffer.from(expected);
-  if (
-    actualBuf.length !== expectedBuf.length ||
-    !timingSafeEqual(actualBuf, expectedBuf)
-  ) {
+  if (actualBuf.length !== expectedBuf.length || !timingSafeEqual(actualBuf, expectedBuf)) {
     return null;
   }
 
   try {
-    const payload = JSON.parse(
-      Buffer.from(body, "base64url").toString("utf8"),
-    ) as SessionPayload;
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as SessionPayload;
     if (!payload.userId || payload.exp < Date.now()) {
       return null;
     }

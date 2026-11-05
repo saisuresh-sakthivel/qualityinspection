@@ -25,11 +25,11 @@ export function BatchBrowser({ batches, canLog }: BatchBrowserProps) {
 
   return (
     <>
-      <ul className="stack">
+      <ul className="flex max-w-xl flex-col gap-4">
         {batches.map((batch) => (
           <li key={batch.id}>
             <button
-              className="card batch-card"
+              className="block w-full cursor-pointer rounded-lg border border-border bg-muted p-4 text-left text-black hover:bg-surface"
               type="button"
               onClick={() => setSelected(batch)}
             >

@@ -23,25 +23,25 @@ export async function AppHeader() {
   const user = await getCurrentUser();
 
   return (
-    <header className="app-header">
-      <div className="app-brand">
-        <Link href={user ? "/batches" : "/login"} className="app-brand-lockup">
-          <PackageCheck className="app-logo" aria-hidden="true" />
-          <span className="app-brand-title">{tApp("title")}</span>
+    <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-border bg-surface px-6 py-3.5">
+      <div className="flex flex-col justify-self-start gap-0.5">
+        <Link href={user ? "/batches" : "/login"} className="flex items-center gap-2">
+          <PackageCheck className="size-8 shrink-0" aria-hidden="true" />
+          <span className="text-lg font-semibold italic">{tApp("title")}</span>
         </Link>
-        {user ? <p className="app-brand-role">{tRole(user.role)}</p> : null}
+        {user ? <p className="m-0 pl-10 text-sm">{tRole(user.role)}</p> : null}
       </div>
+      {user ? <AppNav /> : <span />}
       {user ? (
-        <AppNav />
-      ) : (
-        <span />
-      )}
-      {user ? (
-        <div className="app-header-actions">
-          <span className="app-header-name">{givenName(user.name)}</span>
+        <div className="flex items-center justify-end gap-3">
+          <span className="text-base font-semibold">{givenName(user.name)}</span>
           <form action={logout}>
-            <button className="app-logout" type="submit" aria-label={t("logout")}>
-              <LogOut aria-hidden="true" />
+            <button
+              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md border border-border bg-surface p-0 text-foreground hover:bg-accent"
+              type="submit"
+              aria-label={t("logout")}
+            >
+              <LogOut className="size-4.5" aria-hidden="true" />
             </button>
           </form>
         </div>

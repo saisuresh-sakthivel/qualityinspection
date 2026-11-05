@@ -47,10 +47,7 @@ export async function storePendingClassification(
   await mkdir(UPLOAD_DIR, { recursive: true });
   await writeFile(path.join(UPLOAD_DIR, filename), bytes);
   const record: PendingClassification = { ...pending, imageId, imagePath };
-  await writeFile(
-    path.join(UPLOAD_DIR, `${imageId}.json`),
-    JSON.stringify(record),
-  );
+  await writeFile(path.join(UPLOAD_DIR, `${imageId}.json`), JSON.stringify(record));
   return record;
 }
 
@@ -101,10 +98,7 @@ export async function readPendingClassification(
   }
 
   try {
-    const raw = await readFile(
-      path.join(UPLOAD_DIR, `${imageId}.json`),
-      "utf8",
-    );
+    const raw = await readFile(path.join(UPLOAD_DIR, `${imageId}.json`), "utf8");
     return JSON.parse(raw) as PendingClassification;
   } catch {
     return null;

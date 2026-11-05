@@ -9,10 +9,7 @@ interface InspectionListProps {
 /**
  * Renders logged inspections with a thumbnail, final defect, and accept/override badge.
  */
-export async function InspectionList({
-  inspections,
-  filtered,
-}: InspectionListProps) {
+export async function InspectionList({ inspections, filtered }: InspectionListProps) {
   const t = await getTranslations("Inspection");
   const tDefect = await getTranslations("DefectType");
 
@@ -21,11 +18,14 @@ export async function InspectionList({
   }
 
   return (
-    <ul className="inspection-list">
+    <ul className="flex flex-col gap-3">
       {inspections.map((inspection) => (
-        <li key={inspection.id} className="card inspection-row">
+        <li
+          key={inspection.id}
+          className="flex items-center gap-4 rounded-lg border border-border bg-muted p-4"
+        >
           <img
-            className="thumb"
+            className="size-[4.5rem] rounded-md border border-border bg-surface object-cover"
             src={`/api/inspections/${inspection.id}/image`}
             alt={t("thumbnailAlt", { batch: inspection.batchId })}
           />
@@ -44,8 +44,8 @@ export async function InspectionList({
             <span
               className={
                 inspection.wasOverridden
-                  ? "badge badge-overridden"
-                  : "badge badge-accepted"
+                  ? "inline-block rounded-md border border-border bg-surface px-2 py-0.5 text-xs"
+                  : "inline-block rounded-md bg-accent px-2 py-0.5 text-xs"
               }
             >
               {inspection.wasOverridden ? t("overridden") : t("accepted")}

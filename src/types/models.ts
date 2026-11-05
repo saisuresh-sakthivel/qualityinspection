@@ -1,10 +1,5 @@
 /** Fixed defect taxonomy accepted by the vision pipeline and UI. */
-export type DefectType =
-  | "Scratch"
-  | "Dent"
-  | "Paint Issue"
-  | "Missing Component"
-  | "No Defect";
+export type DefectType = "Scratch" | "Dent" | "Paint Issue" | "Missing Component" | "No Defect";
 
 /** Application roles used for the lightweight role switcher. */
 export type UserRole = "QUALITY_ENGINEER" | "PRODUCTION_SUPERVISOR";

@@ -91,9 +91,7 @@ async function main() {
   await seedBatches();
 
   console.log("Seed complete:");
-  console.log(
-    `  users: ${USERS.map((user) => `${user.username} (${user.role})`).join(", ")}`,
-  );
+  console.log(`  users: ${USERS.map((user) => `${user.username} (${user.role})`).join(", ")}`);
   console.log(`  batches: ${BATCHES.map((batch) => batch.id).join(", ")}`);
 }
 
