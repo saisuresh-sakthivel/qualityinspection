@@ -64,7 +64,19 @@
     "chooseBatch": "Select a batch",
     "chooseType": "Choose a defect type",
     "listHeading": "Inspections",
-    "listPlaceholder": "Inspection list and filters will land here."
+    "listDescription": "Logged inspections, with the final defect type and whether the engineer accepted the AI prediction.",
+    "logInspection": "Log inspection",
+    "filterLabel": "Defect type",
+    "filterAll": "All",
+    "accepted": "Accepted",
+    "overridden": "Overridden",
+    "empty": "No inspections yet.",
+    "emptyFilter": "No inspections match this defect type.",
+    "close": "Close",
+    "selectBatchPrompt": "Select a batch that has not been inspected yet.",
+    "noOpenBatches": "Every batch already has an inspection. Create a batch before logging another.",
+    "inspector": "Inspector",
+    "thumbnailAlt": "Unit photo for {batch}"
   },
   "Dashboard": {
     "heading": "Dashboard",

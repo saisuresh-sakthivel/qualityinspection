@@ -49,6 +49,16 @@ export interface Inspection {
   inspectedAt: Date;
 }
 
+/** One row on the inspection list. */
+export interface InspectionListItem {
+  id: string;
+  batchId: string;
+  finalDefectType: DefectType;
+  wasOverridden: boolean;
+  inspectedAt: Date;
+  inspectorName: string;
+}
+
 /** Ephemeral vision prediction shown before the engineer confirms. */
 export interface VisionPrediction {
   predictedDefectType: DefectType;

@@ -23,9 +23,6 @@ export async function AppHeader() {
             <nav className="flex gap-4 text-sm">
               <Link href="/">{t("home")}</Link>
               {isEngineer ? <Link href="/batches">{t("batches")}</Link> : null}
-              {isEngineer ? (
-                <Link href="/inspections/new">{t("newInspection")}</Link>
-              ) : null}
               <Link href="/inspections">{t("inspections")}</Link>
               <Link href="/dashboard">{t("dashboard")}</Link>
             </nav>

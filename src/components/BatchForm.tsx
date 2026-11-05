@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { errorTranslationKey } from "@/domain/errors";
+import { ApiError, createBatch } from "@/lib/apiClient";
 
 /**
  * Creates a batch through the QE-only API so a supervisor gets HTTP 403.
@@ -19,23 +20,15 @@ export function BatchForm() {
     setPending(true);
     setError(null);
     try {
-      const response = await fetch("/api/batches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: String(formData.get("id") ?? ""),
-          productName: String(formData.get("productName") ?? ""),
-          productionLine: String(formData.get("productionLine") ?? ""),
-        }),
+      await createBatch({
+        id: String(formData.get("id") ?? ""),
+        productName: String(formData.get("productName") ?? ""),
+        productionLine: String(formData.get("productionLine") ?? ""),
       });
-      if (!response.ok) {
-        const body = (await response.json()) as { code?: string };
-        setError(tErrors(errorTranslationKey(body.code ?? "GENERIC")));
-        return;
-      }
       router.refresh();
-    } catch {
-      setError(tErrors("generic"));
+    } catch (error) {
+      const code = error instanceof ApiError ? error.code : "GENERIC";
+      setError(tErrors(errorTranslationKey(code)));
     } finally {
       setPending(false);
     }

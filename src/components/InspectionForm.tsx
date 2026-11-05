@@ -4,11 +4,15 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { DEFECT_TYPES } from "@/domain/defects";
 import { errorTranslationKey } from "@/domain/errors";
+import { ApiError, classifyInspection, saveInspection } from "@/lib/apiClient";
 import type { Batch, DefectType, VisionPrediction } from "@/types/models";
 
 interface InspectionFormProps {
   batches: Batch[];
   initialBatchId?: string;
+  /** When set, the batch is already chosen and the upload step is shown immediately. */
+  lockedBatchId?: string;
+  onSaved?: () => void;
 }
 
 interface ClassifyResult {
@@ -20,7 +24,12 @@ interface ClassifyResult {
 /**
  * Uploads a photo, shows the vision result, then saves the human-confirmed inspection.
  */
-export function InspectionForm({ batches, initialBatchId }: InspectionFormProps) {
+export function InspectionForm({
+  batches,
+  initialBatchId,
+  lockedBatchId,
+  onSaved,
+}: InspectionFormProps) {
   const t = useTranslations("Inspection");
   const tDefect = useTranslations("DefectType");
   const tErrors = useTranslations("Errors");
@@ -35,22 +44,15 @@ export function InspectionForm({ batches, initialBatchId }: InspectionFormProps)
     setSavedId(null);
     setResult(null);
     try {
-      const response = await fetch("/api/inspections/classify", {
-        method: "POST",
-        body: formData,
-      });
-      const body = (await response.json()) as ClassifyResult & { code?: string };
-      if (!response.ok) {
-        setError(tErrors(errorTranslationKey(body.code ?? "GENERIC")));
-        return;
-      }
+      const body = await classifyInspection(formData);
       setResult({
         imageId: body.imageId,
         prediction: body.prediction,
         code: body.code,
       });
-    } catch {
-      setError(tErrors("generic"));
+    } catch (error) {
+      const code = error instanceof ApiError ? error.code : "GENERIC";
+      setError(tErrors(errorTranslationKey(code)));
     } finally {
       setPending(false);
     }
@@ -63,23 +65,16 @@ export function InspectionForm({ batches, initialBatchId }: InspectionFormProps)
     setPending(true);
     setError(null);
     try {
-      const response = await fetch("/api/inspections", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageId: result.imageId,
-          finalDefectType: String(formData.get("finalDefectType") ?? ""),
-          comments: String(formData.get("comments") ?? ""),
-        }),
+      const body = await saveInspection({
+        imageId: result.imageId,
+        finalDefectType: String(formData.get("finalDefectType") ?? ""),
+        comments: String(formData.get("comments") ?? ""),
       });
-      const body = (await response.json()) as { id?: string; code?: string };
-      if (!response.ok || !body.id) {
-        setError(tErrors(errorTranslationKey(body.code ?? "GENERIC")));
-        return;
-      }
       setSavedId(body.id);
-    } catch {
-      setError(tErrors("generic"));
+      onSaved?.();
+    } catch (error) {
+      const code = error instanceof ApiError ? error.code : "GENERIC";
+      setError(tErrors(errorTranslationKey(code)));
     } finally {
       setPending(false);
     }
@@ -90,17 +85,21 @@ export function InspectionForm({ batches, initialBatchId }: InspectionFormProps)
   return (
     <div className="stack">
       <form action={onAnalyze} className="stack">
-        <label className="field">
-          <span>{t("batch")}</span>
-          <select name="batchId" defaultValue={initialBatchId ?? ""} required>
-            <option value="">{t("chooseBatch")}</option>
-            {batches.map((batch) => (
-              <option key={batch.id} value={batch.id}>
-                {batch.id} — {batch.productName}
-              </option>
-            ))}
-          </select>
-        </label>
+        {lockedBatchId ? (
+          <input type="hidden" name="batchId" value={lockedBatchId} />
+        ) : (
+          <label className="field">
+            <span>{t("batch")}</span>
+            <select name="batchId" defaultValue={initialBatchId ?? ""} required>
+              <option value="">{t("chooseBatch")}</option>
+              {batches.map((batch) => (
+                <option key={batch.id} value={batch.id}>
+                  {batch.id} — {batch.productName}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="field">
           <span>{t("image")}</span>
           <input name="image" type="file" accept="image/jpeg,image/png,image/webp" required />

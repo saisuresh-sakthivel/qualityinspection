@@ -4,6 +4,35 @@ import { z } from "zod";
 import { errorResponse, toErrorResponse } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
 import { getPrisma } from "@/lib/db";
+import type { Batch } from "@/types/models";
+
+/**
+ * Batches that have no inspection yet. Used by the log-inspection dialog.
+ */
+export async function listUninspectedBatches(): Promise<Batch[]> {
+  const batches = await getPrisma().batch.findMany({
+    where: { inspections: { none: {} } },
+    orderBy: { id: "asc" },
+  });
+
+  return batches.map((batch) => ({
+    id: batch.id,
+    productName: batch.productName,
+    productionLine: batch.productionLine,
+  }));
+}
+
+/**
+ * Lists batches with no inspection. Quality Engineers only.
+ */
+export async function GET(): Promise<NextResponse> {
+  try {
+    await requireRole("QUALITY_ENGINEER");
+    return NextResponse.json(await listUninspectedBatches());
+  } catch (error) {
+    return toErrorResponse(error);
+  }
+}
 
 const createBatchSchema = z.object({
   id: z

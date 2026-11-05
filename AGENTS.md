@@ -28,7 +28,8 @@ Follow these rules for every change in this repository.
 - Domain logic lives under `src/domain/`.
 - Shared TypeScript data shapes live under `src/types/`.
 - Server helpers live under `src/lib/`.
-- Prefer thin `page.tsx` files that compose components and call server helpers.
+- Browser calls to this app's route handlers go through `src/lib/apiClient.ts` only. Do not call `fetch` on `/api/...` from a component.
+- Prefer thin `page.tsx` files that compose components. Pages do not query the database.
 
 ## Comments
 
@@ -41,6 +42,21 @@ Follow these rules for every change in this repository.
 - Do not introduce ad-hoc hex/rgb colors or font-size values in components.
 - Visual theme is white + light blue. Avoid dark mode, purple gradients, and heavy decorative styling.
 - Prefer few utility classes over elaborate style systems. No shadcn/ui unless explicitly requested.
+
+## Data access
+
+- Prisma queries and `prisma.$transaction` blocks live only in `src/app/api/**/route.ts`.
+- Pages and components must not import the Prisma client. They call a function exported from the route module that owns that query.
+- Do not `fetch` this app's own API during render. A Server Component calls the route function in the same request so the dev server cannot deadlock on itself.
+- Client calls to those routes go through `src/lib/apiClient.ts`. `apiFetch` throws `ApiError` for every non-2xx response (including 400, 401, and 500) and leaves the `code` for the caller to present.
+- Outbound provider calls, such as the vision model, stay next to that provider. They are not app route calls.
+- Session lookup in `src/lib/auth.ts` is the exception. Route handlers use it to identify the caller before they query.
+
+## Role-gated UI
+
+- Show or hide a role-specific control in a Server Component.
+- Read the session on the server. If the role does not match, return `null`.
+- A client component may own interaction (open a dialog, upload a file) only after that server check has already passed. It must not decide the role itself.
 
 ## Data & types
 

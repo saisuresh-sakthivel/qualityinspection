@@ -28,7 +28,7 @@ export async function HomeActions({ user }: HomeActionsProps) {
             <Link className="btn-primary" href="/batches">
               {t("batchesCta")}
             </Link>
-            <Link className="btn-primary" href="/inspections/new">
+            <Link className="btn-primary" href="/inspections">
               {t("startCta")}
             </Link>
           </>

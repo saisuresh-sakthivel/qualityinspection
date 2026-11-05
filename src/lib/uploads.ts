@@ -54,6 +54,42 @@ export async function storePendingClassification(
   return record;
 }
 
+const EXT_MIME: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+};
+
+/**
+ * Reads a stored upload only when the path stays inside the uploads directory.
+ */
+export async function readStoredImage(
+  imagePath: string,
+): Promise<{ bytes: Buffer; mimeType: string } | null> {
+  const normalized = path.posix.normalize(imagePath);
+  if (normalized.startsWith("..") || !normalized.startsWith("uploads/")) {
+    return null;
+  }
+
+  const filename = path.posix.basename(normalized);
+  const absolute = path.resolve(UPLOAD_DIR, filename);
+  if (!absolute.startsWith(path.resolve(UPLOAD_DIR) + path.sep)) {
+    return null;
+  }
+
+  const mimeType = EXT_MIME[path.extname(filename).toLowerCase()];
+  if (!mimeType) {
+    return null;
+  }
+
+  try {
+    return { bytes: await readFile(absolute), mimeType };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Loads the classification captured at upload time. Rejects path tricks.
  */
