@@ -4,13 +4,21 @@ Next.js 16 + React 19 take-home app for human-in-the-loop visual quality inspect
 
 ## Project Details
 
-The section headings below were drafted with an AI assistant. This note is my own account of the decisions in the app.
+The task is one full-stack Next.js 16 app on React 19. Next.js 16 uses Turbopack for the dev server instead of webpack, so local reloads stay quick. The browser never calls a route on its own, and a route never trusts the caller until a shared check has run.
 
-The task is one full-stack Next.js 16 app on React 19. Next.js 16 uses Turbopack for the dev server instead of webpack, so local reloads stay quick. Unit photos are classified with OpenAI `gpt-5.6-terra`. A reply is kept only when the label is one of Scratch, Dent, Paint Issue, Missing Component, or No Defect.
+**Demo video:** [Watch the walkthrough](https://drive.google.com/file/d/18PQc15phqPJA20OZomUuKFcN-XsHNX-4/view?usp=drive_link)
 
-**Demo video:** `PASTE_DEMO_VIDEO_URL`
+**Model cost:** $0.13 over the last 2 days on the `imageclassification` key.
 
-**Model cost:** `PASTE_MODEL_COST`
+![OpenAI usage for image classification: $0.13 total spend](docs/openai-usage.png)
+
+### API
+
+Browser calls go through one client, `src/lib/apiClient.ts`. Create batch, classify, and save inspection all use it. A non-2xx response becomes one `ApiError` with the status and a `code`, so each screen maps that code to a message instead of parsing errors itself.
+
+Every route handler is wrapped with `makeAppApiCall` in `src/lib/api.ts`. The wrapper checks that a session exists, then checks the caller's role against what that endpoint is allowed to do. A read allows either signed-in role. A database write and the analyze call allow only a Quality Engineer. A Production Supervisor receives 403 before the handler inserts a row or classifies a photo.
+
+Image classification uses OpenAI `gpt-5.6-terra` from `src/ai/openai.ts`. The route sends the unit photo, and the reply is kept only when the label is one of Scratch, Dent, Paint Issue, Missing Component, or No Defect. The save route copies those AI fields from the stored result. It does not take them from the browser.
 
 ### Proxy
 
@@ -20,17 +28,13 @@ Next.js 16 puts the old middleware in `src/proxy.ts`. It runs before any page re
 - A signed-in visitor who opens `/login` is sent to `/batches`.
 - A Production Supervisor who opens `/batches/[batchId]/inspect`, including by typing the URL, is sent back to `/batches`.
 
-Changing the role in the cookie breaks the signature, so the request is treated as logged out. API routes are outside the proxy matcher. Classify and save still return 403 from the route handlers when the caller is not a Quality Engineer.
+Changing the role in the cookie breaks the signature, so the request is treated as logged out. API routes stay outside this matcher and keep the checks in `makeAppApiCall`.
 
-### Suspense
+### Interface
 
 The batch list, inspection list, dashboard, and inspect page each render the heading first and wrap the database read in `Suspense`. The visitor sees a loading line, then the rows or steps stream in, so the shell does not wait on Postgres.
 
-### Icons
-
 Icons come from Lucide (`lucide-react`). Each one is an inline SVG imported by name, such as the header mark, logout, upload, and step chevrons. The app does not ship an icon font.
-
-### Theme
 
 The UI is a dark theme with a dark red tone. Tokens live in `src/app/globals.css`: a reddish black background and red-500 for primary actions.
 
