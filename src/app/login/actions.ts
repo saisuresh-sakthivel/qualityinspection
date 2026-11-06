@@ -23,7 +23,7 @@ export async function login(_previous: LoginState, formData: FormData): Promise<
     return { error: "invalid" };
   }
 
-  await setSession(user.id);
+  await setSession(user.id, user.role);
   redirect("/batches");
 }
 

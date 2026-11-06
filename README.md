@@ -4,9 +4,35 @@ Next.js 16 + React 19 take-home app for human-in-the-loop visual quality inspect
 
 ## Project Details
 
-To give headsup the below titles are AI generated. This section is created manually for me to explain more about the project.
+The section headings below were drafted with an AI assistant. This note is my own account of the decisions in the app.
 
-As per the requirement i used a full stack framework for my entire task which is NextJS. leveraged gpt-4 for AI prediction. Leveraged Next 16 with React 19. Next 16 fully supports turbopack which is 10x faster than webpack.
+The task is one full-stack Next.js 16 app on React 19. Next.js 16 uses Turbopack for the dev server instead of webpack, so local reloads stay quick. Unit photos are classified with OpenAI `gpt-5.6-terra`. A reply is kept only when the label is one of Scratch, Dent, Paint Issue, Missing Component, or No Defect.
+
+**Demo video:** `PASTE_DEMO_VIDEO_URL`
+
+**Model cost:** `PASTE_MODEL_COST`
+
+### Proxy
+
+Next.js 16 puts the old middleware in `src/proxy.ts`. It runs before any page renders. Login writes the database role into the signed session cookie, and the proxy reads that cookie:
+
+- A visitor with no session is sent to `/login`.
+- A signed-in visitor who opens `/login` is sent to `/batches`.
+- A Production Supervisor who opens `/batches/[batchId]/inspect`, including by typing the URL, is sent back to `/batches`.
+
+Changing the role in the cookie breaks the signature, so the request is treated as logged out. API routes are outside the proxy matcher. Classify and save still return 403 from the route handlers when the caller is not a Quality Engineer.
+
+### Suspense
+
+The batch list, inspection list, dashboard, and inspect page each render the heading first and wrap the database read in `Suspense`. The visitor sees a loading line, then the rows or steps stream in, so the shell does not wait on Postgres.
+
+### Icons
+
+Icons come from Lucide (`lucide-react`). Each one is an inline SVG imported by name, such as the header mark, logout, upload, and step chevrons. The app does not ship an icon font.
+
+### Theme
+
+The UI is a dark theme with a dark red tone. Tokens live in `src/app/globals.css`: a reddish black background and red-500 for primary actions.
 
 ## Prerequisites
 
@@ -109,7 +135,7 @@ npm run audit
 ## Stack
 
 - Next.js 16 App Router, React 19, TypeScript
-- Tailwind CSS + tokens in `src/app/globals.css` (white / light blue)
+- Tailwind CSS + tokens in `src/app/globals.css` (dark red)
 - `next-intl` + `messages/en.json` for all UI strings
 - Prisma + PostgreSQL
 

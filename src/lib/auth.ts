@@ -11,10 +11,11 @@ import type { SessionUser, UserRole } from "@/types/models";
 
 /**
  * Stores the signed session cookie after a successful login.
+ * The role is the database value, so the proxy can gate pages without a lookup.
  */
-export async function setSession(userId: string): Promise<void> {
+export async function setSession(userId: string, role: UserRole): Promise<void> {
   const jar = await cookies();
-  jar.set(SESSION_COOKIE, encodeSession(userId), {
+  jar.set(SESSION_COOKIE, encodeSession(userId, role), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

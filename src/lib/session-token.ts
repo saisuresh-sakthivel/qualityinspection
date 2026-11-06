@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import type { UserRole } from "@/types/models";
 
 /** Cookie set after a successful login. */
 export const SESSION_COOKIE = "qi_session";
@@ -7,7 +8,21 @@ const MAX_AGE_SECONDS = 60 * 60 * 12;
 
 interface SessionPayload {
   userId: string;
+  role?: UserRole;
   exp: number;
+}
+
+/** Claims the proxy can trust without a database lookup. */
+export interface SessionClaims {
+  userId: string;
+  role: UserRole | null;
+}
+
+/**
+ * Accepts only roles this app issues. Anything else means the payload is not ours.
+ */
+function isUserRole(value: unknown): value is UserRole {
+  return value === "QUALITY_ENGINEER" || value === "PRODUCTION_SUPERVISOR";
 }
 
 /**
@@ -29,11 +44,13 @@ function sign(body: string): string {
 }
 
 /**
- * Builds a signed session cookie value for a user id.
+ * Builds a signed session cookie. The role is taken from the database at login
+ * and covered by the signature, so the browser cannot change it.
  */
-export function encodeSession(userId: string): string {
+export function encodeSession(userId: string, role: UserRole): string {
   const payload: SessionPayload = {
     userId,
+    role,
     exp: Date.now() + MAX_AGE_SECONDS * 1000,
   };
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
@@ -41,9 +58,10 @@ export function encodeSession(userId: string): string {
 }
 
 /**
- * Returns the user id when the cookie signature and expiry are valid.
+ * Returns the signed claims, or null when the signature, expiry, or role is invalid.
+ * A cookie issued before roles were stored still yields a user id and a null role.
  */
-export function readSessionUserId(token: string): string | null {
+export function readSession(token: string): SessionClaims | null {
   const [body, signature] = token.split(".");
   if (!body || !signature) {
     return null;
@@ -61,10 +79,20 @@ export function readSessionUserId(token: string): string | null {
     if (!payload.userId || payload.exp < Date.now()) {
       return null;
     }
-    return payload.userId;
+    if (payload.role !== undefined && !isUserRole(payload.role)) {
+      return null;
+    }
+    return { userId: payload.userId, role: payload.role ?? null };
   } catch {
     return null;
   }
+}
+
+/**
+ * Returns the user id when the cookie signature and expiry are valid.
+ */
+export function readSessionUserId(token: string): string | null {
+  return readSession(token)?.userId ?? null;
 }
 
 /** Session lifetime in seconds. Shared by the cookie max-age. */
