@@ -38,6 +38,10 @@ Icons come from Lucide (`lucide-react`). Each one is an inline SVG imported by n
 
 The UI is a dark theme with a dark red tone. Tokens live in `src/app/globals.css`: a reddish black background and red-500 for primary actions.
 
+### Pre-commit
+
+`npm install` installs a Husky hook at `.husky/pre-commit`. A commit runs Prettier and ESLint on the staged files, then Vitest, a full ESLint pass, and `npm audit` at high severity. Any failure aborts the commit. The same commands are listed under Quality checks.
+
 ## Prerequisites
 
 ### 1. Node.js 22
@@ -114,7 +118,7 @@ A Quality Engineer accepts that label or denies it with a different category. Th
 `npm install` runs `prepare`, which points Git at `.husky`. Every `git commit` then runs, in order:
 
 1. Prettier and ESLint (`eslint` 10 with `eslint-config-next` 16) on the staged files
-2. `npm test` — Vitest for the taxonomy, override flag, vision parse, and KPI rates
+2. `npm test` — Vitest for the taxonomy, override flag, vision parse, KPI rates, and the signed session cookie
 3. `npm run lint` — ESLint on the project
 4. `npm run audit` — `npm audit --audit-level=high`
 
