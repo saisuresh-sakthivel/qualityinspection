@@ -4,7 +4,9 @@ Next.js 16 + React 19 take-home app for human-in-the-loop visual quality inspect
 
 ## Project Details
 
-The task is one full-stack Next.js 16 app on React 19. Next.js 16 uses Turbopack for the dev server instead of webpack, so local reloads stay quick. The browser never calls a route on its own, and a route never trusts the caller until a shared check has run.
+I made a full-stack Next.js 16 app on React 19, and Next.js 16 uses Turbopack. The brief allowed Node.js or a full-stack framework, so I picked the full-stack Node.js framework. There are two logins, one for the Quality Engineer and one for the Production Supervisor. I did not use Keycloak or any other auth service. The brief asked for a simple database login, so that is what I kept. On a successful login the session is stored in a cookie, and the rest of the app authenticates with that cookie.
+
+A Quality Engineer can log an inspection and view the inspection list and dashboard. A Production Supervisor only has view permission.
 
 **Demo video:** [Watch the walkthrough](https://drive.google.com/file/d/18PQc15phqPJA20OZomUuKFcN-XsHNX-4/view?usp=drive_link)
 
